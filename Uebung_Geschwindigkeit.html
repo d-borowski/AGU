@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Übung – Geschwindigkeit</title>
+<style>
+  :root { --scale: 1; --navy: #1f3a68; --sol: #1d5fa8; }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; display: flex; flex-direction: column;
+    font-family: system-ui, "Segoe UI", Roboto, Arial, sans-serif;
+    background: #fff; color: #111;
+  }
+
+  header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 4vw; background: var(--navy); color: #fff; font-size: 20px;
+  }
+  header .title { font-weight: 700; }
+  header .counter { font-weight: 600; opacity: .9; }
+
+  main {
+    flex: 1; overflow-y: auto;
+    font-size: calc(clamp(22px, 2.2vw, 44px) * var(--scale));
+    padding: 1em 4vw 2em;
+  }
+  .wrap { max-width: 1600px; margin: 0 auto; }
+  .topic {
+    font-size: .62em; font-weight: 700; letter-spacing: .06em;
+    text-transform: uppercase; color: #5a6475; margin-bottom: .3em;
+  }
+  .intro { font-size: 1.05em; font-weight: 600; line-height: 1.55; margin-bottom: .8em; }
+
+  .part {
+    border: 3px solid #cdd5e3; border-radius: .4em; background: #f6f8fb;
+    padding: .5em .8em; margin-bottom: .55em;
+  }
+  .part-head { display: flex; align-items: center; gap: .8em; flex-wrap: wrap; justify-content: space-between; }
+  .part-text { flex: 1 1 60%; line-height: 1.55; }
+  .part-label { font-weight: 800; color: var(--navy); margin-right: .3em; }
+
+  .sol-btn {
+    flex: none; font: inherit; font-size: .7em; font-weight: 700; cursor: pointer;
+    color: var(--sol); background: #fff; border: 2px solid var(--sol); border-radius: .4em;
+    padding: .3em .7em;
+  }
+  .sol-btn:hover, .sol-btn[aria-expanded="true"] { background: var(--sol); color: #fff; }
+  .sol-btn:focus-visible { outline: 4px solid #f2b705; outline-offset: 2px; }
+
+  .sol {
+    margin-top: .5em; padding: .55em .9em; border-left: .3em solid var(--sol);
+    background: #e9f1fb; border-radius: .3em; line-height: 1.6; font-size: .92em;
+  }
+  .sol.new { animation: fade .25s ease-out; }
+  .sol .sol-title { font-weight: 800; color: var(--sol); margin-right: .35em; }
+  .sol .line { margin: .25em 0; }
+  @keyframes fade { from { opacity: 0; transform: translateY(-.2em); } to { opacity: 1; transform: none; } }
+
+  /* Mathe */
+  .cv { display: inline-flex; vertical-align: middle; margin: 0 .12em; }
+  .cv-in {
+    display: inline-flex; flex-direction: column; align-items: center;
+    padding: 0 .35em; line-height: 1.12; font-size: .82em;
+    border-left: .09em solid currentColor; border-right: .09em solid currentColor;
+    border-radius: .55em;
+  }
+  .vn { position: relative; display: inline-block; font-style: italic; }
+  .vn::before {
+    content: "\2192"; position: absolute; left: 50%; top: -.68em;
+    transform: translateX(-50%); font-size: .7em; font-style: normal; line-height: 1;
+  }
+  .vn.two::before { transform: translateX(-50%) scaleX(1.9); }
+  .fr { display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; font-size: .8em; line-height: 1.05; margin: 0 .1em; }
+  .fr > span:first-child { border-bottom: .07em solid currentColor; padding: 0 .1em; }
+  i.var { font-family: "Cambria Math", "Times New Roman", serif; }
+  .blank { display: inline-block; min-width: 1.6em; border-bottom: .08em solid currentColor; height: 1em; }
+  .cv .blank { min-width: 1.3em; margin: .08em 0; }
+
+  footer {
+    display: flex; justify-content: space-between; align-items: center; gap: 16px;
+    padding: 10px 4vw; border-top: 2px solid #e2e6ee; background: #f7f8fb; font-size: 20px;
+  }
+  .group { display: flex; align-items: center; gap: 8px; }
+  footer button {
+    font: inherit; font-weight: 700; cursor: pointer; color: var(--navy);
+    background: #fff; border: 2px solid var(--navy); border-radius: 8px; padding: 8px 16px;
+  }
+  footer button:hover:not(:disabled) { background: var(--navy); color: #fff; }
+  footer button:disabled { opacity: .35; cursor: default; }
+  .dots { display: flex; gap: 10px; }
+  .dot {
+    width: 18px; height: 18px; padding: 0 !important; border-radius: 50% !important;
+    border: 2px solid var(--navy) !important; background: #fff;
+  }
+  .dot.active { background: var(--navy) !important; }
+  #zoomLabel { min-width: 3.4em; text-align: center; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="title">Übung: Geschwindigkeit bei gleichförmiger Bewegung</span>
+  <span class="counter" id="counter"></span>
+</header>
+
+<main id="main"><div class="wrap" id="content"></div></main>
+
+<footer>
+  <div class="group">
+    <button id="prev" title="Zurück (Pfeil links)">&larr; Zurück</button>
+    <button id="next" title="Weiter (Pfeil rechts)">Weiter &rarr;</button>
+  </div>
+  <div class="dots" id="dots"></div>
+  <div class="group">
+    <button id="reset" title="Alle Lösungen dieser Aufgabe ausblenden">Lösungen ausblenden</button>
+    <button id="zoomOut" title="Schrift kleiner (−)">A−</button>
+    <span id="zoomLabel">100 %</span>
+    <button id="zoomIn" title="Schrift größer (+)">A+</button>
+  </div>
+</footer>
+
+<script>
+/* ---------- Mathe-Hilfen ---------- */
+const v  = (...c) => `<span class="cv"><span class="cv-in">${c.map(x => `<span>${x}</span>`).join("")}</span></span>`;
+const n  = s => `<span class="vn${s.length > 1 ? " two" : ""}">${s}</span>`;
+const f  = (a, b) => `<span class="fr"><span>${a}</span><span>${b}</span></span>`;
+const t  = `<i class="var">t</i>`;
+const s  = `<i class="var">s</i>`;
+const m  = "−";
+const xv = n("x");
+const B  = `<span class="blank"></span>`;
+const L  = html => `<div class="line">${html}</div>`;
+
+/* ---------- Aufgaben ---------- */
+const tasks = [
+  {
+    topic: "Aufgabe 1 · Schritt für Schritt",
+    intro: `Eine Drohne fliegt geradlinig mit konstanter Geschwindigkeit entlang<br>d: ${xv} = ${v(5,10,0)}&nbsp;+&nbsp;${t}&nbsp;· ${v(2,3,6)} (${t} in Sekunden, Koordinaten in Metern).`,
+    parts: [
+      { label: "a)", text: `Wo befindet sich die Drohne beim Start (${t} = 0) und nach 10 Sekunden?`,
+        sol: L(`${t} = 0: ${v(5,10,0)} ⇒ Startpunkt (5|10|0)`) +
+             L(`${t} = 10: ${v(5,10,0)} + 10 ·&nbsp;${v(2,3,6)} = ${v(25,40,60)} ⇒ Punkt (25|40|60)`) },
+      { label: "b)", text: `Welchen Weg legt die Drohne in einer Sekunde zurück? Gib ihre Geschwindigkeit an.`,
+        sol: L(`In einer Sekunde bewegt sich die Drohne um genau den Richtungsvektor ${v(2,3,6)}.`) +
+             L(`Seine Länge: |${v(2,3,6)}| = √(2² + 3² + 6²) = √49 = 7`) +
+             L(`Die Drohne fliegt 7 m pro Sekunde, also v = 7 m/s.`) },
+      { label: "c)", text: `Rechne die Geschwindigkeit in km/h um.`,
+        sol: L(`1 m/s = 3,6 km/h`) + L(`7 m/s = 7 · 3,6 km/h = 25,2 km/h`) }
+    ]
+  },
+  {
+    topic: "Aufgabe 2 · Wer hat recht?",
+    intro: `Ein Flugzeug fliegt entlang f: ${xv} = ${v(0,0,10)}&nbsp;+&nbsp;${t}&nbsp;· ${v(400,300,0)} (${t} in Stunden, Koordinaten in km).<br>Anna: „700 km/h.“ &nbsp; Ben: „400 km/h.“ &nbsp; Cem: „10 km/h.“`,
+    parts: [
+      { label: "a)", text: `Berechne die Geschwindigkeit des Flugzeugs.`,
+        sol: L(`v = |${v(400,300,0)}| = √(400² + 300² + 0²) = √250 000 = 500`) +
+             L(`Das Flugzeug fliegt 500 km/h. Keiner der drei hat recht.`) },
+      { label: "b)", text: `Beschreibe jeweils den Fehler von Anna, Ben und Cem.`,
+        sol: L(`<b>Anna</b> hat die Koordinaten addiert (400 + 300 + 0). Die Länge eines Vektors berechnet man aber mit dem Satz des Pythagoras.`) +
+             L(`<b>Ben</b> hat nur die Bewegung in x-Richtung betrachtet. Das Flugzeug bewegt sich aber gleichzeitig auch in y-Richtung.`) +
+             L(`<b>Cem</b> hat die 10 aus dem Stützvektor genommen. Sie gibt die Flughöhe beim Start an, nicht die Geschwindigkeit.`) },
+      { label: "c)", text: `In welcher Höhe fliegt das Flugzeug? Woran erkennst du das?`,
+        sol: L(`Die z-Komponente des Richtungsvektors ist 0. Die Höhe ändert sich also nicht.`) +
+             L(`Das Flugzeug fliegt dauerhaft in 10 km Höhe.`) }
+    ]
+  },
+  {
+    topic: "Aufgabe 3 · Wann kommt das Schiff an?",
+    intro: `Ein Schiff fährt um 9:00 Uhr los und bewegt sich entlang s: ${xv} = ${v(4,m+"2",0)}&nbsp;+&nbsp;${t}&nbsp;· ${v(6,8,0)} (${t} in Stunden, Koordinaten in km).`,
+    parts: [
+      { label: "a)", text: `Mit welcher Geschwindigkeit fährt das Schiff?`,
+        sol: L(`v = |${v(6,8,0)}| = √(6² + 8²) = √100 = 10`) + L(`Das Schiff fährt 10 km/h.`) },
+      { label: "b)", text: `Zeige, dass der Hafen H(22|22|0) auf dem Kurs liegt. Wann kommt das Schiff dort an?`,
+        sol: L(`1. Zeile: 22 = 4 + 6${t} ⇒ ${t} = 3`) +
+             L(`2. Zeile: 22 = ${m}2 + 8${t} ⇒ ${t} = 3`) +
+             L(`3. Zeile: 0 = 0 ✔`) +
+             L(`H liegt auf dem Kurs. Das Schiff erreicht H nach 3 Stunden, also um 12:00 Uhr.`) },
+      { label: "c)", text: `Wie weit ist das Schiff bis zum Hafen gefahren? Prüfe dein Ergebnis auf zwei Wegen.`,
+        sol: L(`Weg 1: Strecke = Geschwindigkeit · Zeit = 10 km/h · 3 h = 30 km`) +
+             L(`Weg 2: Abstand Start–Hafen: |${v(`22 ${m} 4`,`22 ${m} (${m}2)`,`0`)}| = |${v(18,24,0)}| = √(18² + 24²) = √900 = 30 km ✔`) }
+    ]
+  },
+  {
+    topic: "Aufgabe 4 · Parameter oder Zeit?",
+    intro: `Ein Rettungshubschrauber startet in A(0|0|0) und fliegt geradlinig zum Einsatzort B(6|3|2) (Koordinaten in km). Seine Geschwindigkeit beträgt 210 km/h.`,
+    parts: [
+      { label: "a)", text: `Wie lange braucht der Hubschrauber von A nach B?`,
+        sol: L(`|${n("AB")}| = |${v(6,3,2)}| = √(36 + 9 + 4) = √49 = 7 km`) +
+             L(`Zeit = Strecke : Geschwindigkeit = 7 km : 210 km/h = ${f(1,30)} h = 2 min`) },
+      { label: "b)", text: `Die Gleichung g: ${xv} = ${t}&nbsp;· ${v(6,3,2)} beschreibt die Flugbahn. Erkläre, warum ${t} hier <u>nicht</u> die Zeit in Stunden ist.`,
+        sol: L(`Bei ${t} = 1 ist der Hubschrauber in B. Das passiert aber schon nach 2 Minuten, nicht nach 1 Stunde.`) +
+             L(`Der Richtungsvektor hat die Länge 7, der Hubschrauber fliegt aber 210 km pro Stunde.`) +
+             L(`${t} ist hier nur ein Parameter, der die Lage auf der Bahn beschreibt, keine Zeit.`) },
+      { label: "c)", text: `Stelle eine Gleichung auf, in der ${t} die Zeit in Stunden ist.`,
+        sol: L(`Der Richtungsvektor muss die Länge 210 haben. Wegen 210 : 7 = 30 strecken wir ${n("AB")} mit dem Faktor 30:`) +
+             L(`30 ·&nbsp;${v(6,3,2)} = ${v(180,90,60)}, Kontrolle: |${v(180,90,60)}| = 30 · 7 = 210 ✔`) +
+             L(`h: ${xv} = ${t}&nbsp;· ${v(180,90,60)} (${t} in Stunden)`) },
+      { label: "d)", text: `Wo ist der Hubschrauber nach einer Minute?`,
+        sol: L(`1 min = ${f(1,60)} h`) +
+             L(`${f(1,60)}&nbsp;· ${v(180,90,60)} = ${v(3,"1,5",1)}`) +
+             L(`Nach einer Minute ist er im Punkt (3|1,5|1), genau auf halber Strecke, passend zur Flugzeit von 2 min. ✔`) }
+    ]
+  },
+  {
+    topic: "Aufgabe 5 · Zwei Flugzeuge",
+    intro: `Flugzeug 1 fliegt entlang f<sub>1</sub>: ${xv} = ${v(0,0,9)}&nbsp;+&nbsp;${t}&nbsp;· ${v(300,400,0)} (${t} in Stunden, Koordinaten in km).`,
+    parts: [
+      { label: "a)", text: `Berechne die Geschwindigkeit von Flugzeug 1.`,
+        sol: L(`v<sub>1</sub> = |${v(300,400,0)}| = √(300² + 400²) = √250 000 = 500 km/h`) },
+      { label: "b)", text: `Flugzeug 2 startet zur gleichen Zeit am gleichen Ort und fliegt in dieselbe Richtung, aber mit 750 km/h. Stelle seine Gleichung auf.`,
+        sol: L(`750 : 500 = 1,5. Der Richtungsvektor wird mit 1,5 gestreckt:`) +
+             L(`1,5 ·&nbsp;${v(300,400,0)} = ${v(450,600,0)}`) +
+             L(`f<sub>2</sub>: ${xv} = ${v(0,0,9)}&nbsp;+&nbsp;${t}&nbsp;· ${v(450,600,0)}`) },
+      { label: "c)", text: `Wie weit sind die beiden Flugzeuge nach 2 Stunden voneinander entfernt?`,
+        sol: L(`Flugzeug 1: ${v(0,0,9)} + 2 ·&nbsp;${v(300,400,0)} = ${v(600,800,9)}`) +
+             L(`Flugzeug 2: ${v(0,0,9)} + 2 ·&nbsp;${v(450,600,0)} = ${v(900,1200,9)}`) +
+             L(`Abstand: |${v(`900 ${m} 600`,`1200 ${m} 800`,`9 ${m} 9`)}| = |${v(300,400,0)}| = 500 km`) +
+             L(`Kontrolle: Flugzeug 2 ist 250 km/h schneller, nach 2 h also 500 km voraus. ✔`) }
+    ]
+  }
+];
+
+/* ---------- Zustand ---------- */
+const opened = tasks.map(() => new Set());
+let current = 0, justOpened = -1, scale = 1;
+try { const sc = parseFloat(localStorage.getItem("ue-scale")); if (sc >= 0.5 && sc <= 2.5) scale = sc; } catch (e) {}
+const $ = id => document.getElementById(id);
+
+function render() {
+  const task = tasks[current];
+  let html = `<div class="topic">${task.topic}</div><div class="intro">${task.intro}</div>`;
+  task.parts.forEach((p, i) => {
+    const open = opened[current].has(i);
+    html += `<div class="part" data-i="${i}">
+      <div class="part-head">
+        <div class="part-text"><span class="part-label">${p.label}</span>${p.text}</div>
+        <button class="sol-btn" aria-expanded="${open}" title="Taste ${i + 1}">${open ? "Lösung ausblenden ▴" : "Lösung anzeigen ▾"}</button>
+      </div>
+      ${open ? `<div class="sol${i === justOpened ? " new" : ""}"><span class="sol-title">Musterlösung ${p.label}</span>${p.sol}</div>` : ""}
+    </div>`;
+  });
+  $("content").innerHTML = html;
+  $("content").querySelectorAll(".part").forEach(el =>
+    el.querySelector(".sol-btn").addEventListener("click", () => toggle(+el.dataset.i)));
+
+  $("counter").textContent = `Aufgabe ${current + 1} / ${tasks.length}`;
+  $("prev").disabled = current === 0;
+  $("next").disabled = current === tasks.length - 1;
+  document.querySelectorAll(".dot").forEach((d, i) => d.classList.toggle("active", i === current));
+}
+
+function toggle(i) {
+  const set = opened[current];
+  const was = set.has(i);
+  was ? set.delete(i) : set.add(i);
+  justOpened = was ? -1 : i;
+  render();
+  justOpened = -1;
+  if (!was) {
+    const el = $("content").querySelector(`.part[data-i="${i}"] .sol`);
+    if (el) el.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }
+}
+
+function go(i) {
+  if (i < 0 || i >= tasks.length) return;
+  current = i; render(); $("main").scrollTop = 0;
+}
+
+function setScale(sc) {
+  scale = Math.min(2.5, Math.max(0.5, Math.round(sc * 10) / 10));
+  document.documentElement.style.setProperty("--scale", scale);
+  $("zoomLabel").textContent = Math.round(scale * 100) + " %";
+  try { localStorage.setItem("ue-scale", scale); } catch (e) {}
+}
+
+tasks.forEach((_, i) => {
+  const d = document.createElement("button");
+  d.className = "dot"; d.title = `Aufgabe ${i + 1}`; d.setAttribute("aria-label", `Aufgabe ${i + 1}`);
+  d.addEventListener("click", () => go(i));
+  $("dots").appendChild(d);
+});
+$("prev").addEventListener("click", () => go(current - 1));
+$("next").addEventListener("click", () => go(current + 1));
+$("zoomIn").addEventListener("click", () => setScale(scale + 0.1));
+$("zoomOut").addEventListener("click", () => setScale(scale - 0.1));
+$("reset").addEventListener("click", () => { opened[current].clear(); render(); });
+
+document.addEventListener("keydown", e => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const k = e.key;
+  if (k === "ArrowRight" || k === "PageDown") { e.preventDefault(); go(current + 1); }
+  else if (k === "ArrowLeft" || k === "PageUp") { e.preventDefault(); go(current - 1); }
+  else if (k === "+" || k === "=") setScale(scale + 0.1);
+  else if (k === "-" || k === "_") setScale(scale - 0.1);
+  else if (k === "0") setScale(1);
+  else if (/^[1-9]$/.test(k) && +k <= tasks[current].parts.length) toggle(+k - 1);
+});
+
+setScale(scale);
+render();
+</script>
+</body>
+</html>
