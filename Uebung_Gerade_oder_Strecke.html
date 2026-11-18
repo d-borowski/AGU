@@ -137,19 +137,19 @@ const L  = html => `<div class="line">${html}</div>`;
 const tasks = [
   {
     topic: "Aufgabe 1 · Was bedeutet t?",
-    intro: `Die Gerade g durch A(2|1|0) und B(6|3|4) hat die Gleichung<br>g: ${xv} = ${v(2,1,0)} + ${t} · ${v(4,2,4)} mit ${n("OA")} als Stützvektor und ${n("AB")} als Richtungsvektor.`,
+    intro: `Die Gerade g durch A(2|1|0) und B(6|3|4) hat die Gleichung<br>g: ${xv} = ${v(2,1,0)}&nbsp;+&nbsp;${t}&nbsp;· ${v(4,2,4)} mit ${n("OA")} als Stützvektor und ${n("AB")} als Richtungsvektor.`,
     parts: [
       { label: "a)", text: `Welche Punkte erhältst du für ${t} = 0 und für ${t} = 1?`,
-        sol: L(`${t} = 0: ${v(2,1,0)} + 0 · ${v(4,2,4)} = ${v(2,1,0)} ⇒ Punkt A`) +
-             L(`${t} = 1: ${v(2,1,0)} + 1 · ${v(4,2,4)} = ${v(6,3,4)} ⇒ Punkt B`) },
+        sol: L(`${t} = 0: ${v(2,1,0)} + 0 ·&nbsp;${v(4,2,4)} = ${v(2,1,0)} ⇒ Punkt A`) +
+             L(`${t} = 1: ${v(2,1,0)} + 1 ·&nbsp;${v(4,2,4)} = ${v(6,3,4)} ⇒ Punkt B`) },
       { label: "b)", text: `Berechne die Punkte für ${t} = 0,5, ${t} = 2 und ${t} = ${m}1.`,
-        sol: L(`${t} = 0,5: ${v(2,1,0)} + 0,5 · ${v(4,2,4)} = ${v(4,2,2)}`) +
-             L(`${t} = 2: ${v(2,1,0)} + 2 · ${v(4,2,4)} = ${v(10,5,8)}`) +
-             L(`${t} = ${m}1: ${v(2,1,0)} ${m} 1 · ${v(4,2,4)} = ${v(m+"2",m+"1",m+"4")}`) },
+        sol: L(`${t} = 0,5: ${v(2,1,0)} + 0,5 ·&nbsp;${v(4,2,4)} = ${v(4,2,2)}`) +
+             L(`${t} = 2: ${v(2,1,0)} + 2 ·&nbsp;${v(4,2,4)} = ${v(10,5,8)}`) +
+             L(`${t} = ${m}1: ${v(2,1,0)} ${m} 1 ·&nbsp;${v(4,2,4)} = ${v(m+"2",m+"1",m+"4")}`) },
       { label: "c)", text: `Welche der Punkte aus b) liegen auf der <u>Strecke</u> AB? Formuliere eine Regel.`,
         sol: L(`Nur (4|2|2) mit ${t} = 0,5 liegt auf der Strecke, genau in der Mitte zwischen A und B.`) +
              L(`${t} = 2 führt über B hinaus, ${t} = ${m}1 führt von A aus in die Gegenrichtung.`) +
-             L(`<b>Regel:</b> Bei ${xv} = ${n("OA")} + ${t} · ${n("AB")} liegt ein Punkt genau dann auf der Strecke AB, wenn 0 ≤ ${t} ≤ 1.`) }
+             L(`<b>Regel:</b> Bei ${xv} = ${n("OA")}&nbsp;+&nbsp;${t}&nbsp;· ${n("AB")} liegt ein Punkt genau dann auf der Strecke AB, wenn 0 ≤ ${t} ≤ 1.`) }
     ]
   },
   {
@@ -158,7 +158,7 @@ const tasks = [
     parts: [
       { label: "a)", text: `Stelle die Geradengleichung mit ${n("OA")} als Stützvektor auf.`,
         sol: L(`${n("AB")} = ${n("OB")} ${m} ${n("OA")} = ${v(`4 ${m} 1`,`6 ${m} 0`,`${m}1 ${m} 2`)} = ${v(3,6,m+"3")}`) +
-             L(`g: ${xv} = ${v(1,0,2)} + ${t} · ${v(3,6,m+"3")}`) },
+             L(`g: ${xv} = ${v(1,0,2)}&nbsp;+&nbsp;${t}&nbsp;· ${v(3,6,m+"3")}`) },
       { label: "b)", text: `P(2|2|1)`,
         sol: L(`1. Zeile: 2 = 1 + 3${t} ⇒ ${t} = ${f(1,3)}`) +
              L(`2. Zeile: 2 = 6${t} ⇒ ${t} = ${f(1,3)}`) +
@@ -178,14 +178,14 @@ const tasks = [
   },
   {
     topic: "Aufgabe 3 · Teilpunkte",
-    intro: `Gegeben sind A(0|4|2) und B(8|0|6) mit g: ${xv} = ${v(0,4,2)} + ${t} · ${v(8,m+"4",4)}.`,
+    intro: `Gegeben sind A(0|4|2) und B(8|0|6) mit g: ${xv} = ${v(0,4,2)}&nbsp;+&nbsp;${t}&nbsp;· ${v(8,m+"4",4)}.`,
     parts: [
       { label: "a)", text: `Bestimme den Mittelpunkt M der Strecke AB.`,
         sol: L(`Der Mittelpunkt gehört zu ${t} = ${f(1,2)}:`) +
-             L(`${v(0,4,2)} + ${f(1,2)} · ${v(8,m+"4",4)} = ${v(4,2,4)} ⇒ M(4|2|4)`) },
+             L(`${v(0,4,2)}&nbsp;+&nbsp;${f(1,2)}&nbsp;· ${v(8,m+"4",4)} = ${v(4,2,4)} ⇒ M(4|2|4)`) },
       { label: "b)", text: `Bestimme den Punkt V, der ein Viertel des Weges von A nach B liegt.`,
         sol: L(`Ein Viertel des Weges gehört zu ${t} = ${f(1,4)}:`) +
-             L(`${v(0,4,2)} + ${f(1,4)} · ${v(8,m+"4",4)} = ${v(2,3,3)} ⇒ V(2|3|3)`) },
+             L(`${v(0,4,2)}&nbsp;+&nbsp;${f(1,4)}&nbsp;· ${v(8,m+"4",4)} = ${v(2,3,3)} ⇒ V(2|3|3)`) },
       { label: "c)", text: `Zu welchem ${t} gehört der Punkt W(16|${m}4|10)? Beschreibe die Lage von W im Vergleich zu A und B.`,
         sol: L(`1. Zeile: 16 = 8${t} ⇒ ${t} = 2`) +
              L(`2. Zeile: ${m}4 = 4 ${m} 4${t} ⇒ ${t} = 2`) +
@@ -197,13 +197,13 @@ const tasks = [
     topic: "Aufgabe 4 · Die Regel hängt von der Gleichung ab",
     intro: `Gegeben sind A(1|2|3) und B(5|2|${m}1).`,
     parts: [
-      { label: "a)", text: `Jemand stellt die Gerade mit B als Stützpunkt auf: h: ${xv} = ${v(5,2,m+"1")} + ${s} · ${v(m+"4",0,4)}.<br>Für welche Werte von ${s} liegt der zugehörige Punkt P der Geraden h auf der Strecke AB?`,
+      { label: "a)", text: `Jemand stellt die Gerade mit B als Stützpunkt auf:<br>h: ${xv} = ${v(5,2,m+"1")}&nbsp;+&nbsp;${s}&nbsp;· ${v(m+"4",0,4)}.<br>Für welche Werte von ${s} liegt der zugehörige Punkt P der Geraden h auf der Strecke AB?`,
         sol: L(`Der Richtungsvektor ist ${n("BA")} = ${n("OA")} ${m} ${n("OB")} = ${v(m+"4",0,4)}.`) +
              L(`${s} = 0 ergibt B, ${s} = 1 ergibt A.`) +
              L(`Also liegt P auch hier genau für 0 ≤ ${s} ≤ 1 auf der Strecke AB, nur „von B aus“ betrachtet.`) },
-      { label: "b)", text: `Jemand anderes schreibt: k: ${xv} = ${v(1,2,3)} + ${t} · ${v(8,0,m+"8")}.<br>Für welche Werte von ${t} liegt der zugehörige Punkt P der Geraden k jetzt auf der Strecke AB?`,
-        sol: L(`${n("AB")} = ${v(4,0,m+"4")}. Der Richtungsvektor ${v(8,0,m+"8")} ist 2 · ${n("AB")}, also doppelt so lang.`) +
-             L(`B wird schon bei ${t} = ${f(1,2)} erreicht: ${v(1,2,3)} + ${f(1,2)} · ${v(8,0,m+"8")} = ${v(5,2,m+"1")}`) +
+      { label: "b)", text: `Jemand anderes schreibt:<br>k: ${xv} = ${v(1,2,3)}&nbsp;+&nbsp;${t}&nbsp;· ${v(8,0,m+"8")}.<br>Für welche Werte von ${t} liegt der zugehörige Punkt P der Geraden k jetzt auf der Strecke AB?`,
+        sol: L(`${n("AB")} = ${v(4,0,m+"4")}. Der Richtungsvektor ${v(8,0,m+"8")} ist 2 ·&nbsp;${n("AB")}, also doppelt so lang.`) +
+             L(`B wird schon bei ${t} = ${f(1,2)} erreicht: ${v(1,2,3)}&nbsp;+&nbsp;${f(1,2)}&nbsp;· ${v(8,0,m+"8")} = ${v(5,2,m+"1")}`) +
              L(`P liegt also genau für 0 ≤ ${t} ≤ ${f(1,2)} auf der Strecke AB.`) },
       { label: "c)", text: `Was lernst du daraus über die Regel „0 ≤ ${t} ≤ 1“?`,
         sol: L(`Die Regel gilt nur, wenn der Stützvektor zu einem Endpunkt gehört und der Richtungsvektor <b>genau</b> der Verbindungsvektor zum anderen Endpunkt ist.`) +
@@ -212,7 +212,7 @@ const tasks = [
   },
   {
     topic: "Aufgabe 5 · Anwendung: Seilbahn",
-    intro: `Eine Seilbahn führt geradlinig von der Talstation T(0|0|0) zur Bergstation B(400|300|200) (Angaben in Metern, z = Höhe).<br>Das Seil wird beschrieben durch s: ${xv} = ${t} · ${v(400,300,200)}.`,
+    intro: `Eine Seilbahn führt geradlinig von der Talstation T(0|0|0) zur Bergstation B(400|300|200) (Angaben in Metern, z = Höhe).<br>Das Seil wird beschrieben durch s: ${xv} = ${t}&nbsp;· ${v(400,300,200)}.`,
     parts: [
       { label: "a)", text: `Liegt der Punkt P(200|150|100) auf dem Seil?`,
         sol: L(`Alle drei Zeilen liefern ${t} = ${f(1,2)}.`) +
@@ -221,7 +221,7 @@ const tasks = [
         sol: L(`Alle drei Zeilen liefern ${t} = 1,5.`) +
              L(`W liegt zwar auf der Geraden, aber wegen ${t} > 1 hinter der Bergstation. Dort gibt es kein Seil mehr. Der Wanderer hat <b>nicht</b> recht.`) },
       { label: "c)", text: `Berechne den Punkt für ${t} = ${m}0,5 und deute das Ergebnis im Sachzusammenhang.`,
-        sol: L(`${m}0,5 · ${v(400,300,200)} = ${v(m+"200",m+"150",m+"100")}`) +
+        sol: L(`${m}0,5 ·&nbsp;${v(400,300,200)} = ${v(m+"200",m+"150",m+"100")}`) +
              L(`Der Punkt liegt 100 m <b>unter</b> der Talstation, also im Berg. Mathematisch liegt er auf der Geraden, aber in der Wirklichkeit nicht auf dem Seil.`) +
              L(`Merke: Im Sachzusammenhang immer prüfen, welche Parameterwerte sinnvoll sind!`) }
     ]
