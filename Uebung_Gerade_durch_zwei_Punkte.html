@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Übung – Gerade durch zwei Punkte</title>
+<style>
+  :root { --scale: 1; --navy: #1f3a68; --sol: #1d5fa8; }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; display: flex; flex-direction: column;
+    font-family: system-ui, "Segoe UI", Roboto, Arial, sans-serif;
+    background: #fff; color: #111;
+  }
+
+  header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 4vw; background: var(--navy); color: #fff; font-size: 20px;
+  }
+  header .title { font-weight: 700; }
+  header .counter { font-weight: 600; opacity: .9; }
+
+  main {
+    flex: 1; overflow-y: auto;
+    font-size: calc(clamp(22px, 2.2vw, 44px) * var(--scale));
+    padding: 1em 4vw 2em;
+  }
+  .wrap { max-width: 1600px; margin: 0 auto; }
+  .topic {
+    font-size: .62em; font-weight: 700; letter-spacing: .06em;
+    text-transform: uppercase; color: #5a6475; margin-bottom: .3em;
+  }
+  .intro { font-size: 1.05em; font-weight: 600; line-height: 1.55; margin-bottom: .8em; }
+
+  .part {
+    border: 3px solid #cdd5e3; border-radius: .4em; background: #f6f8fb;
+    padding: .5em .8em; margin-bottom: .55em;
+  }
+  .part-head { display: flex; align-items: center; gap: .8em; flex-wrap: wrap; justify-content: space-between; }
+  .part-text { flex: 1 1 60%; line-height: 1.55; }
+  .part-label { font-weight: 800; color: var(--navy); margin-right: .3em; }
+
+  .sol-btn {
+    flex: none; font: inherit; font-size: .7em; font-weight: 700; cursor: pointer;
+    color: var(--sol); background: #fff; border: 2px solid var(--sol); border-radius: .4em;
+    padding: .3em .7em;
+  }
+  .sol-btn:hover, .sol-btn[aria-expanded="true"] { background: var(--sol); color: #fff; }
+  .sol-btn:focus-visible { outline: 4px solid #f2b705; outline-offset: 2px; }
+
+  .sol {
+    margin-top: .5em; padding: .55em .9em; border-left: .3em solid var(--sol);
+    background: #e9f1fb; border-radius: .3em; line-height: 1.6; font-size: .92em;
+  }
+  .sol.new { animation: fade .25s ease-out; }
+  .sol .sol-title { font-weight: 800; color: var(--sol); margin-right: .35em; }
+  .sol .line { margin: .25em 0; }
+  @keyframes fade { from { opacity: 0; transform: translateY(-.2em); } to { opacity: 1; transform: none; } }
+
+  /* Mathe */
+  .cv { display: inline-flex; vertical-align: middle; margin: 0 .12em; }
+  .cv-in {
+    display: inline-flex; flex-direction: column; align-items: center;
+    padding: 0 .35em; line-height: 1.12; font-size: .82em;
+    border-left: .09em solid currentColor; border-right: .09em solid currentColor;
+    border-radius: .55em;
+  }
+  .vn { position: relative; display: inline-block; font-style: italic; }
+  .vn::before {
+    content: "\2192"; position: absolute; left: 50%; top: -.68em;
+    transform: translateX(-50%); font-size: .7em; font-style: normal; line-height: 1;
+  }
+  .vn.two::before { transform: translateX(-50%) scaleX(1.9); }
+  .fr { display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; font-size: .8em; line-height: 1.05; margin: 0 .1em; }
+  .fr > span:first-child { border-bottom: .07em solid currentColor; padding: 0 .1em; }
+  i.var { font-family: "Cambria Math", "Times New Roman", serif; }
+  .blank { display: inline-block; min-width: 1.6em; border-bottom: .08em solid currentColor; height: 1em; }
+  .cv .blank { min-width: 1.3em; margin: .08em 0; }
+
+  footer {
+    display: flex; justify-content: space-between; align-items: center; gap: 16px;
+    padding: 10px 4vw; border-top: 2px solid #e2e6ee; background: #f7f8fb; font-size: 20px;
+  }
+  .group { display: flex; align-items: center; gap: 8px; }
+  footer button {
+    font: inherit; font-weight: 700; cursor: pointer; color: var(--navy);
+    background: #fff; border: 2px solid var(--navy); border-radius: 8px; padding: 8px 16px;
+  }
+  footer button:hover:not(:disabled) { background: var(--navy); color: #fff; }
+  footer button:disabled { opacity: .35; cursor: default; }
+  .dots { display: flex; gap: 10px; }
+  .dot {
+    width: 18px; height: 18px; padding: 0 !important; border-radius: 50% !important;
+    border: 2px solid var(--navy) !important; background: #fff;
+  }
+  .dot.active { background: var(--navy) !important; }
+  #zoomLabel { min-width: 3.4em; text-align: center; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="title">Übung: Gerade durch zwei Punkte</span>
+  <span class="counter" id="counter"></span>
+</header>
+
+<main id="main"><div class="wrap" id="content"></div></main>
+
+<footer>
+  <div class="group">
+    <button id="prev" title="Zurück (Pfeil links)">&larr; Zurück</button>
+    <button id="next" title="Weiter (Pfeil rechts)">Weiter &rarr;</button>
+  </div>
+  <div class="dots" id="dots"></div>
+  <div class="group">
+    <button id="reset" title="Alle Lösungen dieser Aufgabe ausblenden">Lösungen ausblenden</button>
+    <button id="zoomOut" title="Schrift kleiner (−)">A−</button>
+    <span id="zoomLabel">100 %</span>
+    <button id="zoomIn" title="Schrift größer (+)">A+</button>
+  </div>
+</footer>
+
+<script>
+/* ---------- Mathe-Hilfen ---------- */
+const v  = (...c) => `<span class="cv"><span class="cv-in">${c.map(x => `<span>${x}</span>`).join("")}</span></span>`;
+const n  = s => `<span class="vn${s.length > 1 ? " two" : ""}">${s}</span>`;
+const f  = (a, b) => `<span class="fr"><span>${a}</span><span>${b}</span></span>`;
+const t  = `<i class="var">t</i>`;
+const s  = `<i class="var">s</i>`;
+const m  = "−";
+const xv = n("x");
+const B  = `<span class="blank"></span>`;
+const L  = html => `<div class="line">${html}</div>`;
+
+/* ---------- Aufgaben ---------- */
+const tasks = [
+  {
+    topic: "Aufgabe 1 · Schritt für Schritt",
+    intro: `Bestimme eine Gleichung der Geraden g durch A(1|2|3) und B(4|6|5).`,
+    parts: [
+      { label: "a)", text: `Stützvektor: ${n("OA")} = ${v(B,B,B)}`,
+        sol: L(`${n("OA")} = ${v(1,2,3)}`) },
+      { label: "b)", text: `Richtungsvektor: ${n("AB")} = ${n("OB")} ${m} ${n("OA")} = ${v(B,B,B)}`,
+        sol: L(`${n("AB")} = ${n("OB")} ${m} ${n("OA")} = ${v(4,6,5)} ${m} ${v(1,2,3)} = ${v(`4 ${m} 1`,`6 ${m} 2`,`5 ${m} 3`)} = ${v(3,4,2)}`) },
+      { label: "c)", text: `Geradengleichung: g: ${xv} = ${B}${B} + ${t} · ${B}${B}`,
+        sol: L(`g: ${xv} = ${v(1,2,3)} + ${t} · ${v(3,4,2)}`) },
+      { label: "d)", text: `Probe: Setze ${t} = 1 ein. Welchen Punkt erhältst du?`,
+        sol: L(`${v(1,2,3)} + 1 · ${v(3,4,2)} = ${v(4,6,5)}`) + L(`Das ist der Punkt B. ✔ Die Gleichung ist richtig.`) }
+    ]
+  },
+  {
+    topic: "Aufgabe 2 · Selbstständig",
+    intro: `Bestimme eine Gleichung der Geraden h durch C(2|${m}1|4) und D(${m}1|3|0).`,
+    parts: [
+      { label: "a)", text: `Stelle die Geradengleichung auf.`,
+        sol: L(`Stützvektor: ${n("OC")} = ${v(2,m+"1",4)}`) +
+             L(`Richtungsvektor: ${n("CD")} = ${n("OD")} ${m} ${n("OC")} = ${v(`${m}1 ${m} 2`,`3 ${m} (${m}1)`,`0 ${m} 4`)} = ${v(m+"3",4,m+"4")}`) +
+             L(`h: ${xv} = ${v(2,m+"1",4)} + ${t} · ${v(m+"3",4,m+"4")}`) },
+      { label: "b)", text: `Mache die Probe mit ${t} = 1.`,
+        sol: L(`${v(2,m+"1",4)} + 1 · ${v(m+"3",4,m+"4")} = ${v(m+"1",3,0)}`) + L(`Das ist der Punkt D. ✔`) }
+    ]
+  },
+  {
+    topic: "Aufgabe 3 · Ein Sonderfall",
+    intro: `Gegeben sind die Punkte P(0|0|0) und Q(2|5|${m}1).`,
+    parts: [
+      { label: "a)", text: `Bestimme eine Gleichung der Geraden k durch P und Q.`,
+        sol: L(`${n("PQ")} = ${n("OQ")} ${m} ${n("OP")} = ${v(2,5,m+"1")} ${m} ${v(0,0,0)} = ${v(2,5,m+"1")}`) +
+             L(`k: ${xv} = ${v(0,0,0)} + ${t} · ${v(2,5,m+"1")} , kurz: k: ${xv} = ${t} · ${v(2,5,m+"1")}`) },
+      { label: "b)", text: `Hier ist der Richtungsvektor ${n("PQ")} gleich dem Ortsvektor ${n("OQ")}. Erkläre, warum das <u>nur hier</u> funktioniert.`,
+        sol: L(`Allgemein gilt ${n("PQ")} = ${n("OQ")} ${m} ${n("OP")}.`) +
+             L(`Weil P im Ursprung liegt, ist ${n("OP")} der Nullvektor. Man zieht also „nichts“ ab, und es bleibt ${n("PQ")} = ${n("OQ")}.`) +
+             L(`Liegt P nicht im Ursprung, ist ${n("OP")} ≠ ${n("o")} und damit ${n("PQ")} ≠ ${n("OQ")}. Dann wäre der Ortsvektor als Richtungsvektor <b>falsch</b>.`) }
+    ]
+  },
+  {
+    topic: "Aufgabe 4 · Viele Wege führen zur Geraden",
+    intro: `Gegeben sind die Punkte E(3|0|${m}2) und F(5|4|${m}2).`,
+    parts: [
+      { label: "a)", text: `Stelle eine Gleichung der Geraden g durch E und F auf.`,
+        sol: L(`${n("EF")} = ${n("OF")} ${m} ${n("OE")} = ${v(`5 ${m} 3`,`4 ${m} 0`,`${m}2 ${m} (${m}2)`)} = ${v(2,4,0)}`) +
+             L(`g: ${xv} = ${v(3,0,m+"2")} + ${t} · ${v(2,4,0)}`) },
+      { label: "b)", text: `Gib eine <b>zweite</b> Gleichung derselben Geraden an. Nimm F als Stützpunkt und wähle einen möglichst kurzen Richtungsvektor.`,
+        sol: L(`Stützvektor: ${n("OF")} = ${v(5,4,m+"2")}`) +
+             L(`Richtungsvektor: ${f(1,2)} · ${n("EF")} = ${v(1,2,0)} zeigt in dieselbe Richtung.`) +
+             L(`h: ${xv} = ${v(5,4,m+"2")} + ${s} · ${v(1,2,0)}`) },
+      { label: "c)", text: `Zeige, dass E auch auf deiner zweiten Geraden liegt.`,
+        sol: L(`Ansatz: ${v(5,4,m+"2")} + ${s} · ${v(1,2,0)} = ${v(3,0,m+"2")}`) +
+             L(`1. Zeile: 5 + ${s} = 3 ⇒ ${s} = ${m}2`) +
+             L(`2. Zeile: 4 + 2${s} = 0 ⇒ ${s} = ${m}2`) +
+             L(`3. Zeile: ${m}2 + 0 · ${s} = ${m}2 ⇒ wahr für jedes ${s}`) +
+             L(`Mit ${s} = ${m}2 sind alle drei Zeilen erfüllt. E liegt auf h. ✔`) }
+    ]
+  },
+  {
+    topic: "Aufgabe 5 · Finde den Fehler",
+    intro: `Tim soll die Gerade durch G(1|3|2) und H(4|1|6) aufstellen. Er schreibt:<br>g: ${xv} = ${v(1,3,2)} + ${t} · ${v(4,1,6)}`,
+    parts: [
+      { label: "a)", text: `Beschreibe Tims Fehler.`,
+        sol: L(`Tim hat den <b>Ortsvektor</b> ${n("OH")} = ${v(4,1,6)} als Richtungsvektor genommen.`) +
+             L(`Richtig wäre der Verbindungsvektor ${n("GH")} = ${n("OH")} ${m} ${n("OG")}.`) },
+      { label: "b)", text: `Zeige mit einer Punktprobe, dass H nicht auf Tims Gerade liegt.`,
+        sol: L(`Ansatz: ${v(1,3,2)} + ${t} · ${v(4,1,6)} = ${v(4,1,6)}`) +
+             L(`1. Zeile: 1 + 4${t} = 4 ⇒ ${t} = ${f(3,4)}`) +
+             L(`2. Zeile: 3 + ${t} = 1 ⇒ ${t} = ${m}2`) +
+             L(`Widerspruch: Es gibt kein gemeinsames ${t}. H liegt nicht auf Tims Gerade.`) },
+      { label: "c)", text: `Gib die richtige Geradengleichung an.`,
+        sol: L(`${n("GH")} = ${n("OH")} ${m} ${n("OG")} = ${v(`4 ${m} 1`,`1 ${m} 3`,`6 ${m} 2`)} = ${v(3,m+"2",4)}`) +
+             L(`g: ${xv} = ${v(1,3,2)} + ${t} · ${v(3,m+"2",4)}`) +
+             L(`Probe mit ${t} = 1: ${v(1,3,2)} + ${v(3,m+"2",4)} = ${v(4,1,6)} = H ✔`) }
+    ]
+  }
+];
+
+/* ---------- Zustand ---------- */
+const opened = tasks.map(() => new Set());
+let current = 0, justOpened = -1, scale = 1;
+try { const sc = parseFloat(localStorage.getItem("ue-scale")); if (sc >= 0.5 && sc <= 2.5) scale = sc; } catch (e) {}
+const $ = id => document.getElementById(id);
+
+function render() {
+  const task = tasks[current];
+  let html = `<div class="topic">${task.topic}</div><div class="intro">${task.intro}</div>`;
+  task.parts.forEach((p, i) => {
+    const open = opened[current].has(i);
+    html += `<div class="part" data-i="${i}">
+      <div class="part-head">
+        <div class="part-text"><span class="part-label">${p.label}</span>${p.text}</div>
+        <button class="sol-btn" aria-expanded="${open}" title="Taste ${i + 1}">${open ? "Lösung ausblenden ▴" : "Lösung anzeigen ▾"}</button>
+      </div>
+      ${open ? `<div class="sol${i === justOpened ? " new" : ""}"><span class="sol-title">Musterlösung ${p.label}</span>${p.sol}</div>` : ""}
+    </div>`;
+  });
+  $("content").innerHTML = html;
+  $("content").querySelectorAll(".part").forEach(el =>
+    el.querySelector(".sol-btn").addEventListener("click", () => toggle(+el.dataset.i)));
+
+  $("counter").textContent = `Aufgabe ${current + 1} / ${tasks.length}`;
+  $("prev").disabled = current === 0;
+  $("next").disabled = current === tasks.length - 1;
+  document.querySelectorAll(".dot").forEach((d, i) => d.classList.toggle("active", i === current));
+}
+
+function toggle(i) {
+  const set = opened[current];
+  const was = set.has(i);
+  was ? set.delete(i) : set.add(i);
+  justOpened = was ? -1 : i;
+  render();
+  justOpened = -1;
+  if (!was) {
+    const el = $("content").querySelector(`.part[data-i="${i}"] .sol`);
+    if (el) el.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }
+}
+
+function go(i) {
+  if (i < 0 || i >= tasks.length) return;
+  current = i; render(); $("main").scrollTop = 0;
+}
+
+function setScale(sc) {
+  scale = Math.min(2.5, Math.max(0.5, Math.round(sc * 10) / 10));
+  document.documentElement.style.setProperty("--scale", scale);
+  $("zoomLabel").textContent = Math.round(scale * 100) + " %";
+  try { localStorage.setItem("ue-scale", scale); } catch (e) {}
+}
+
+tasks.forEach((_, i) => {
+  const d = document.createElement("button");
+  d.className = "dot"; d.title = `Aufgabe ${i + 1}`; d.setAttribute("aria-label", `Aufgabe ${i + 1}`);
+  d.addEventListener("click", () => go(i));
+  $("dots").appendChild(d);
+});
+$("prev").addEventListener("click", () => go(current - 1));
+$("next").addEventListener("click", () => go(current + 1));
+$("zoomIn").addEventListener("click", () => setScale(scale + 0.1));
+$("zoomOut").addEventListener("click", () => setScale(scale - 0.1));
+$("reset").addEventListener("click", () => { opened[current].clear(); render(); });
+
+document.addEventListener("keydown", e => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const k = e.key;
+  if (k === "ArrowRight" || k === "PageDown") { e.preventDefault(); go(current + 1); }
+  else if (k === "ArrowLeft" || k === "PageUp") { e.preventDefault(); go(current - 1); }
+  else if (k === "+" || k === "=") setScale(scale + 0.1);
+  else if (k === "-" || k === "_") setScale(scale - 0.1);
+  else if (k === "0") setScale(1);
+  else if (/^[1-9]$/.test(k) && +k <= tasks[current].parts.length) toggle(+k - 1);
+});
+
+setScale(scale);
+render();
+</script>
+</body>
+</html>
