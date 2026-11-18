@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Übung – Punktprobe</title>
+<style>
+  :root { --scale: 1; --navy: #1f3a68; --sol: #1d5fa8; }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; display: flex; flex-direction: column;
+    font-family: system-ui, "Segoe UI", Roboto, Arial, sans-serif;
+    background: #fff; color: #111;
+  }
+
+  header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 4vw; background: var(--navy); color: #fff; font-size: 20px;
+  }
+  header .title { font-weight: 700; }
+  header .counter { font-weight: 600; opacity: .9; }
+
+  main {
+    flex: 1; overflow-y: auto;
+    font-size: calc(clamp(22px, 2.2vw, 44px) * var(--scale));
+    padding: 1em 4vw 2em;
+  }
+  .wrap { max-width: 1600px; margin: 0 auto; }
+  .topic {
+    font-size: .62em; font-weight: 700; letter-spacing: .06em;
+    text-transform: uppercase; color: #5a6475; margin-bottom: .3em;
+  }
+  .intro { font-size: 1.05em; font-weight: 600; line-height: 1.55; margin-bottom: .8em; }
+
+  .part {
+    border: 3px solid #cdd5e3; border-radius: .4em; background: #f6f8fb;
+    padding: .5em .8em; margin-bottom: .55em;
+  }
+  .part-head { display: flex; align-items: center; gap: .8em; flex-wrap: wrap; justify-content: space-between; }
+  .part-text { flex: 1 1 60%; line-height: 1.55; }
+  .part-label { font-weight: 800; color: var(--navy); margin-right: .3em; }
+
+  .sol-btn {
+    flex: none; font: inherit; font-size: .7em; font-weight: 700; cursor: pointer;
+    color: var(--sol); background: #fff; border: 2px solid var(--sol); border-radius: .4em;
+    padding: .3em .7em;
+  }
+  .sol-btn:hover, .sol-btn[aria-expanded="true"] { background: var(--sol); color: #fff; }
+  .sol-btn:focus-visible { outline: 4px solid #f2b705; outline-offset: 2px; }
+
+  .sol {
+    margin-top: .5em; padding: .55em .9em; border-left: .3em solid var(--sol);
+    background: #e9f1fb; border-radius: .3em; line-height: 1.6; font-size: .92em;
+  }
+  .sol.new { animation: fade .25s ease-out; }
+  .sol .sol-title { font-weight: 800; color: var(--sol); margin-right: .35em; }
+  .sol .line { margin: .25em 0; }
+  @keyframes fade { from { opacity: 0; transform: translateY(-.2em); } to { opacity: 1; transform: none; } }
+
+  /* Mathe */
+  .cv { display: inline-flex; vertical-align: middle; margin: 0 .12em; }
+  .cv-in {
+    display: inline-flex; flex-direction: column; align-items: center;
+    padding: 0 .35em; line-height: 1.12; font-size: .82em;
+    border-left: .09em solid currentColor; border-right: .09em solid currentColor;
+    border-radius: .55em;
+  }
+  .vn { position: relative; display: inline-block; font-style: italic; }
+  .vn::before {
+    content: "\2192"; position: absolute; left: 50%; top: -.68em;
+    transform: translateX(-50%); font-size: .7em; font-style: normal; line-height: 1;
+  }
+  .vn.two::before { transform: translateX(-50%) scaleX(1.9); }
+  .fr { display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; font-size: .8em; line-height: 1.05; margin: 0 .1em; }
+  .fr > span:first-child { border-bottom: .07em solid currentColor; padding: 0 .1em; }
+  i.var { font-family: "Cambria Math", "Times New Roman", serif; }
+  .blank { display: inline-block; min-width: 1.6em; border-bottom: .08em solid currentColor; height: 1em; }
+  .cv .blank { min-width: 1.3em; margin: .08em 0; }
+
+  footer {
+    display: flex; justify-content: space-between; align-items: center; gap: 16px;
+    padding: 10px 4vw; border-top: 2px solid #e2e6ee; background: #f7f8fb; font-size: 20px;
+  }
+  .group { display: flex; align-items: center; gap: 8px; }
+  footer button {
+    font: inherit; font-weight: 700; cursor: pointer; color: var(--navy);
+    background: #fff; border: 2px solid var(--navy); border-radius: 8px; padding: 8px 16px;
+  }
+  footer button:hover:not(:disabled) { background: var(--navy); color: #fff; }
+  footer button:disabled { opacity: .35; cursor: default; }
+  .dots { display: flex; gap: 10px; }
+  .dot {
+    width: 18px; height: 18px; padding: 0 !important; border-radius: 50% !important;
+    border: 2px solid var(--navy) !important; background: #fff;
+  }
+  .dot.active { background: var(--navy) !important; }
+  #zoomLabel { min-width: 3.4em; text-align: center; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="title">Übung: Punktprobe</span>
+  <span class="counter" id="counter"></span>
+</header>
+
+<main id="main"><div class="wrap" id="content"></div></main>
+
+<footer>
+  <div class="group">
+    <button id="prev" title="Zurück (Pfeil links)">&larr; Zurück</button>
+    <button id="next" title="Weiter (Pfeil rechts)">Weiter &rarr;</button>
+  </div>
+  <div class="dots" id="dots"></div>
+  <div class="group">
+    <button id="reset" title="Alle Lösungen dieser Aufgabe ausblenden">Lösungen ausblenden</button>
+    <button id="zoomOut" title="Schrift kleiner (−)">A−</button>
+    <span id="zoomLabel">100 %</span>
+    <button id="zoomIn" title="Schrift größer (+)">A+</button>
+  </div>
+</footer>
+
+<script>
+/* ---------- Mathe-Hilfen ---------- */
+const v  = (...c) => `<span class="cv"><span class="cv-in">${c.map(x => `<span>${x}</span>`).join("")}</span></span>`;
+const n  = s => `<span class="vn${s.length > 1 ? " two" : ""}">${s}</span>`;
+const f  = (a, b) => `<span class="fr"><span>${a}</span><span>${b}</span></span>`;
+const t  = `<i class="var">t</i>`;
+const s  = `<i class="var">s</i>`;
+const m  = "−";
+const xv = n("x");
+const B  = `<span class="blank"></span>`;
+const L  = html => `<div class="line">${html}</div>`;
+
+/* ---------- Aufgaben ---------- */
+const tasks = [
+  {
+    topic: "Aufgabe 1 · Schritt für Schritt",
+    intro: `Gegeben ist die Gerade g: ${xv} = ${v(2,1,m+"1")} + ${t} · ${v(1,3,2)}.<br>Liegt der Punkt P(4|7|3) auf g?`,
+    parts: [
+      { label: "a)", text: `Setze ${n("OP")} für ${xv} ein und schreibe das Gleichungssystem zeilenweise auf.`,
+        sol: L(`Ansatz: ${v(4,7,3)} = ${v(2,1,m+"1")} + ${t} · ${v(1,3,2)}`) +
+             L(`1. Zeile: 4 = 2 + ${t}`) + L(`2. Zeile: 7 = 1 + 3${t}`) + L(`3. Zeile: 3 = ${m}1 + 2${t}`) },
+      { label: "b)", text: `Löse jede Zeile nach ${t} auf.`,
+        sol: L(`1. Zeile: 4 = 2 + ${t} ⇒ ${t} = 2`) + L(`2. Zeile: 7 = 1 + 3${t} ⇒ 3${t} = 6 ⇒ ${t} = 2`) + L(`3. Zeile: 3 = ${m}1 + 2${t} ⇒ 2${t} = 4 ⇒ ${t} = 2`) },
+      { label: "c)", text: `Entscheide: Liegt P auf g? Begründe.`,
+        sol: L(`Alle drei Zeilen liefern <b>dasselbe</b> ${t} = 2. Also liegt P auf g. ✔`) +
+             L(`Kontrolle: ${v(2,1,m+"1")} + 2 · ${v(1,3,2)} = ${v(4,7,3)}`) }
+    ]
+  },
+  {
+    topic: "Aufgabe 2 · Selbstständig",
+    intro: `Gegeben ist die Gerade h: ${xv} = ${v(1,0,4)} + ${t} · ${v(2,m+"1",1)}.`,
+    parts: [
+      { label: "a)", text: `Prüfe, ob der Punkt Q(7|${m}3|6) auf h liegt.`,
+        sol: L(`Ansatz: ${v(7,m+"3",6)} = ${v(1,0,4)} + ${t} · ${v(2,m+"1",1)}`) +
+             L(`1. Zeile: 7 = 1 + 2${t} ⇒ ${t} = 3`) +
+             L(`2. Zeile: ${m}3 = 0 ${m} ${t} ⇒ ${t} = 3`) +
+             L(`3. Zeile: 6 = 4 + ${t} ⇒ ${t} = 2`) +
+             L(`Die 3. Zeile liefert ein anderes ${t}. Q liegt <b>nicht</b> auf h.`) +
+             L(`Achtung: Wer nach zwei Zeilen aufhört, kommt hier zum falschen Ergebnis!`) },
+      { label: "b)", text: `Ändere die z-Koordinate von Q so, dass der neue Punkt auf h liegt.`,
+        sol: L(`Aus der 1. und 2. Zeile folgt ${t} = 3.`) +
+             L(`z-Koordinate: 4 + 3 = 7`) +
+             L(`Der Punkt Q′(7|${m}3|7) liegt auf h. ✔`) }
+    ]
+  },
+  {
+    topic: "Aufgabe 3 · Drei Punkte prüfen",
+    intro: `Gegeben ist die Gerade k: ${xv} = ${v(3,m+"2",0)} + ${t} · ${v(m+"1",2,4)}.<br>Prüfe jeweils, ob der Punkt auf k liegt.`,
+    parts: [
+      { label: "a)", text: `A(1|2|8)`,
+        sol: L(`1. Zeile: 1 = 3 ${m} ${t} ⇒ ${t} = 2`) +
+             L(`2. Zeile: 2 = ${m}2 + 2${t} ⇒ ${t} = 2`) +
+             L(`3. Zeile: 8 = 4${t} ⇒ ${t} = 2`) +
+             L(`Gleiches ${t} in allen Zeilen ⇒ A liegt auf k. ✔`) },
+      { label: "b)", text: `B(5|${m}6|${m}8)`,
+        sol: L(`1. Zeile: 5 = 3 ${m} ${t} ⇒ ${t} = ${m}2`) +
+             L(`2. Zeile: ${m}6 = ${m}2 + 2${t} ⇒ ${t} = ${m}2`) +
+             L(`3. Zeile: ${m}8 = 4${t} ⇒ ${t} = ${m}2`) +
+             L(`Gleiches ${t} in allen Zeilen ⇒ B liegt auf k. ✔ (Ein negatives ${t} ist erlaubt.)`) },
+      { label: "c)", text: `C(2|0|5)`,
+        sol: L(`1. Zeile: 2 = 3 ${m} ${t} ⇒ ${t} = 1`) +
+             L(`2. Zeile: 0 = ${m}2 + 2${t} ⇒ ${t} = 1`) +
+             L(`3. Zeile: 5 = 4${t} ⇒ ${t} = ${f(5,4)}`) +
+             L(`Widerspruch ⇒ C liegt <b>nicht</b> auf k.`) }
+    ]
+  },
+  {
+    topic: "Aufgabe 4 · Eine Null im Richtungsvektor",
+    intro: `Gegeben ist die Gerade m: ${xv} = ${v(2,5,1)} + ${t} · ${v(3,0,m+"2")}.`,
+    parts: [
+      { label: "a)", text: `Liegt R(8|5|${m}3) auf m?`,
+        sol: L(`1. Zeile: 8 = 2 + 3${t} ⇒ ${t} = 2`) +
+             L(`2. Zeile: 5 = 5 + 0 · ${t} ⇒ 5 = 5, wahr für jedes ${t}`) +
+             L(`3. Zeile: ${m}3 = 1 ${m} 2${t} ⇒ ${t} = 2`) +
+             L(`Mit ${t} = 2 sind alle Zeilen erfüllt ⇒ R liegt auf m. ✔`) },
+      { label: "b)", text: `Liegt S(8|4|${m}3) auf m?`,
+        sol: L(`2. Zeile: 4 = 5 + 0 · ${t} ⇒ 4 = 5, falsch für jedes ${t}`) +
+             L(`Diese Zeile kann nie erfüllt werden ⇒ S liegt <b>nicht</b> auf m.`) +
+             L(`Merke: Alle Punkte von m haben die y-Koordinate 5.`) }
+    ]
+  },
+  {
+    topic: "Aufgabe 5 · Fehler finden und umdrehen",
+    intro: `Lena soll prüfen, ob T(5|2|8) auf g: ${xv} = ${v(1,4,3)} + ${t} · ${v(2,m+"1",3)} liegt. Sie schreibt:<br>„1 + 2${t} = 5 ⇒ ${t} = 2 und 4 ${m} ${t} = 2 ⇒ ${t} = 2. Also liegt T auf g.“`,
+    parts: [
+      { label: "a)", text: `Beschreibe Lenas Fehler.`,
+        sol: L(`Lena hat nur zwei der drei Zeilen geprüft. Ein Punkt liegt erst dann auf der Geraden, wenn <b>alle drei</b> Zeilen dasselbe ${t} liefern.`) },
+      { label: "b)", text: `Führe die Punktprobe vollständig durch.`,
+        sol: L(`1. Zeile: 5 = 1 + 2${t} ⇒ ${t} = 2`) +
+             L(`2. Zeile: 2 = 4 ${m} ${t} ⇒ ${t} = 2`) +
+             L(`3. Zeile: 8 = 3 + 3${t} ⇒ ${t} = ${f(5,3)}`) +
+             L(`Widerspruch ⇒ T liegt <b>nicht</b> auf g.`) },
+      { label: "c)", text: `Bestimme die Zahl a so, dass der Punkt U(a|${m}1|18) auf g liegt.`,
+        sol: L(`2. Zeile: ${m}1 = 4 ${m} ${t} ⇒ ${t} = 5`) +
+             L(`3. Zeile: 18 = 3 + 3${t} ⇒ ${t} = 5 ✔ (passt zusammen)`) +
+             L(`1. Zeile: a = 1 + 2 · 5 = 11`) +
+             L(`Für a = 11 liegt U(11|${m}1|18) auf g.`) }
+    ]
+  }
+];
+
+/* ---------- Zustand ---------- */
+const opened = tasks.map(() => new Set());
+let current = 0, justOpened = -1, scale = 1;
+try { const sc = parseFloat(localStorage.getItem("ue-scale")); if (sc >= 0.5 && sc <= 2.5) scale = sc; } catch (e) {}
+const $ = id => document.getElementById(id);
+
+function render() {
+  const task = tasks[current];
+  let html = `<div class="topic">${task.topic}</div><div class="intro">${task.intro}</div>`;
+  task.parts.forEach((p, i) => {
+    const open = opened[current].has(i);
+    html += `<div class="part" data-i="${i}">
+      <div class="part-head">
+        <div class="part-text"><span class="part-label">${p.label}</span>${p.text}</div>
+        <button class="sol-btn" aria-expanded="${open}" title="Taste ${i + 1}">${open ? "Lösung ausblenden ▴" : "Lösung anzeigen ▾"}</button>
+      </div>
+      ${open ? `<div class="sol${i === justOpened ? " new" : ""}"><span class="sol-title">Musterlösung ${p.label}</span>${p.sol}</div>` : ""}
+    </div>`;
+  });
+  $("content").innerHTML = html;
+  $("content").querySelectorAll(".part").forEach(el =>
+    el.querySelector(".sol-btn").addEventListener("click", () => toggle(+el.dataset.i)));
+
+  $("counter").textContent = `Aufgabe ${current + 1} / ${tasks.length}`;
+  $("prev").disabled = current === 0;
+  $("next").disabled = current === tasks.length - 1;
+  document.querySelectorAll(".dot").forEach((d, i) => d.classList.toggle("active", i === current));
+}
+
+function toggle(i) {
+  const set = opened[current];
+  const was = set.has(i);
+  was ? set.delete(i) : set.add(i);
+  justOpened = was ? -1 : i;
+  render();
+  justOpened = -1;
+  if (!was) {
+    const el = $("content").querySelector(`.part[data-i="${i}"] .sol`);
+    if (el) el.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }
+}
+
+function go(i) {
+  if (i < 0 || i >= tasks.length) return;
+  current = i; render(); $("main").scrollTop = 0;
+}
+
+function setScale(sc) {
+  scale = Math.min(2.5, Math.max(0.5, Math.round(sc * 10) / 10));
+  document.documentElement.style.setProperty("--scale", scale);
+  $("zoomLabel").textContent = Math.round(scale * 100) + " %";
+  try { localStorage.setItem("ue-scale", scale); } catch (e) {}
+}
+
+tasks.forEach((_, i) => {
+  const d = document.createElement("button");
+  d.className = "dot"; d.title = `Aufgabe ${i + 1}`; d.setAttribute("aria-label", `Aufgabe ${i + 1}`);
+  d.addEventListener("click", () => go(i));
+  $("dots").appendChild(d);
+});
+$("prev").addEventListener("click", () => go(current - 1));
+$("next").addEventListener("click", () => go(current + 1));
+$("zoomIn").addEventListener("click", () => setScale(scale + 0.1));
+$("zoomOut").addEventListener("click", () => setScale(scale - 0.1));
+$("reset").addEventListener("click", () => { opened[current].clear(); render(); });
+
+document.addEventListener("keydown", e => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const k = e.key;
+  if (k === "ArrowRight" || k === "PageDown") { e.preventDefault(); go(current + 1); }
+  else if (k === "ArrowLeft" || k === "PageUp") { e.preventDefault(); go(current - 1); }
+  else if (k === "+" || k === "=") setScale(scale + 0.1);
+  else if (k === "-" || k === "_") setScale(scale - 0.1);
+  else if (k === "0") setScale(1);
+  else if (/^[1-9]$/.test(k) && +k <= tasks[current].parts.length) toggle(+k - 1);
+});
+
+setScale(scale);
+render();
+</script>
+</body>
+</html>
