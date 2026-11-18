@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Übung – Schnittpunkt oder Zusammenstoß?</title>
+<style>
+  :root { --scale: 1; --navy: #1f3a68; --sol: #1d5fa8; }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; display: flex; flex-direction: column;
+    font-family: system-ui, "Segoe UI", Roboto, Arial, sans-serif;
+    background: #fff; color: #111;
+  }
+
+  header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 4vw; background: var(--navy); color: #fff; font-size: 20px;
+  }
+  header .title { font-weight: 700; }
+  header .counter { font-weight: 600; opacity: .9; }
+
+  main {
+    flex: 1; overflow-y: auto;
+    font-size: calc(clamp(22px, 2.2vw, 44px) * var(--scale));
+    padding: 1em 4vw 2em;
+  }
+  .wrap { max-width: 1600px; margin: 0 auto; }
+  .topic {
+    font-size: .62em; font-weight: 700; letter-spacing: .06em;
+    text-transform: uppercase; color: #5a6475; margin-bottom: .3em;
+  }
+  .intro { font-size: 1.05em; font-weight: 600; line-height: 1.55; margin-bottom: .8em; }
+
+  .part {
+    border: 3px solid #cdd5e3; border-radius: .4em; background: #f6f8fb;
+    padding: .5em .8em; margin-bottom: .55em;
+  }
+  .part-head { display: flex; align-items: center; gap: .8em; flex-wrap: wrap; justify-content: space-between; }
+  .part-text { flex: 1 1 60%; line-height: 1.55; }
+  .part-label { font-weight: 800; color: var(--navy); margin-right: .3em; }
+
+  .sol-btn {
+    flex: none; font: inherit; font-size: .7em; font-weight: 700; cursor: pointer;
+    color: var(--sol); background: #fff; border: 2px solid var(--sol); border-radius: .4em;
+    padding: .3em .7em;
+  }
+  .sol-btn:hover, .sol-btn[aria-expanded="true"] { background: var(--sol); color: #fff; }
+  .sol-btn:focus-visible { outline: 4px solid #f2b705; outline-offset: 2px; }
+
+  .sol {
+    margin-top: .5em; padding: .55em .9em; border-left: .3em solid var(--sol);
+    background: #e9f1fb; border-radius: .3em; line-height: 1.6; font-size: .92em;
+  }
+  .sol.new { animation: fade .25s ease-out; }
+  .sol .sol-title { font-weight: 800; color: var(--sol); margin-right: .35em; }
+  .sol .line { margin: .25em 0; }
+  @keyframes fade { from { opacity: 0; transform: translateY(-.2em); } to { opacity: 1; transform: none; } }
+
+  /* Mathe */
+  .cv { display: inline-flex; vertical-align: middle; margin: 0 .12em; }
+  .cv-in {
+    display: inline-flex; flex-direction: column; align-items: center;
+    padding: 0 .35em; line-height: 1.12; font-size: .82em;
+    border-left: .09em solid currentColor; border-right: .09em solid currentColor;
+    border-radius: .55em;
+  }
+  .vn { position: relative; display: inline-block; font-style: italic; }
+  .vn::before {
+    content: "\2192"; position: absolute; left: 50%; top: -.68em;
+    transform: translateX(-50%); font-size: .7em; font-style: normal; line-height: 1;
+  }
+  .vn.two::before { transform: translateX(-50%) scaleX(1.9); }
+  .fr { display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; font-size: .8em; line-height: 1.05; margin: 0 .1em; }
+  .fr > span:first-child { border-bottom: .07em solid currentColor; padding: 0 .1em; }
+  i.var { font-family: "Cambria Math", "Times New Roman", serif; }
+  .blank { display: inline-block; min-width: 1.6em; border-bottom: .08em solid currentColor; height: 1em; }
+  .cv .blank { min-width: 1.3em; margin: .08em 0; }
+
+  footer {
+    display: flex; justify-content: space-between; align-items: center; gap: 16px;
+    padding: 10px 4vw; border-top: 2px solid #e2e6ee; background: #f7f8fb; font-size: 20px;
+  }
+  .group { display: flex; align-items: center; gap: 8px; }
+  footer button {
+    font: inherit; font-weight: 700; cursor: pointer; color: var(--navy);
+    background: #fff; border: 2px solid var(--navy); border-radius: 8px; padding: 8px 16px;
+  }
+  footer button:hover:not(:disabled) { background: var(--navy); color: #fff; }
+  footer button:disabled { opacity: .35; cursor: default; }
+  .dots { display: flex; gap: 10px; }
+  .dot {
+    width: 18px; height: 18px; padding: 0 !important; border-radius: 50% !important;
+    border: 2px solid var(--navy) !important; background: #fff;
+  }
+  .dot.active { background: var(--navy) !important; }
+  #zoomLabel { min-width: 3.4em; text-align: center; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="title">Übung: Schnittpunkt oder Zusammenstoß?</span>
+  <span class="counter" id="counter"></span>
+</header>
+
+<main id="main"><div class="wrap" id="content"></div></main>
+
+<footer>
+  <div class="group">
+    <button id="prev" title="Zurück (Pfeil links)">&larr; Zurück</button>
+    <button id="next" title="Weiter (Pfeil rechts)">Weiter &rarr;</button>
+  </div>
+  <div class="dots" id="dots"></div>
+  <div class="group">
+    <button id="reset" title="Alle Lösungen dieser Aufgabe ausblenden">Lösungen ausblenden</button>
+    <button id="zoomOut" title="Schrift kleiner (−)">A−</button>
+    <span id="zoomLabel">100 %</span>
+    <button id="zoomIn" title="Schrift größer (+)">A+</button>
+  </div>
+</footer>
+
+<script>
+/* ---------- Mathe-Hilfen ---------- */
+const v  = (...c) => `<span class="cv"><span class="cv-in">${c.map(x => `<span>${x}</span>`).join("")}</span></span>`;
+const n  = s => `<span class="vn${s.length > 1 ? " two" : ""}">${s}</span>`;
+const f  = (a, b) => `<span class="fr"><span>${a}</span><span>${b}</span></span>`;
+const t  = `<i class="var">t</i>`;
+const s  = `<i class="var">s</i>`;
+const m  = "−";
+const xv = n("x");
+const B  = `<span class="blank"></span>`;
+const L  = html => `<div class="line">${html}</div>`;
+
+/* ---------- Aufgaben ---------- */
+const r = `<i class="var">r</i>`;
+const tasks = [
+  {
+    topic: "Aufgabe 1 · Schritt für Schritt: zwei Drohnen",
+    intro: `Zwei Drohnen starten gleichzeitig (${t} in Sekunden, Koordinaten in Metern):<br>D<sub>1</sub>: ${xv} = ${v(0,0,10)}&nbsp;+&nbsp;${t}&nbsp;· ${v(2,1,0)} &nbsp;&nbsp; D<sub>2</sub>: ${xv} = ${v(15,m+"10",10)}&nbsp;+&nbsp;${t}&nbsp;· ${v(m+"1",3,0)}`,
+    parts: [
+      { label: "a)", text: `Bestimme den Schnittpunkt der beiden Flugbahnen. Verwende dazu für die Bahnen die Parameter ${r} und ${s}.`,
+        sol: L(`Ansatz: ${v(0,0,10)}&nbsp;+&nbsp;${r}&nbsp;· ${v(2,1,0)} = ${v(15,m+"10",10)}&nbsp;+&nbsp;${s}&nbsp;· ${v(m+"1",3,0)}`) +
+             L(`1. Zeile: 2${r} = 15 ${m} ${s}`) +
+             L(`2. Zeile: ${r} = ${m}10 + 3${s}`) +
+             L(`3. Zeile: 10 = 10 ✔`) +
+             L(`2. in 1.: 2(${m}10 + 3${s}) = 15 ${m} ${s} ⇒ 7${s} = 35 ⇒ ${s} = 5, also ${r} = 5`) +
+             L(`Schnittpunkt: ${v(0,0,10)} + 5 ·&nbsp;${v(2,1,0)} = ${v(10,5,10)} ⇒ S(10|5|10)`) },
+      { label: "b)", text: `Stoßen die Drohnen zusammen? Begründe mit den Parametern aus a).`,
+        sol: L(`Beide Parameter sind hier Zeiten in Sekunden.`) +
+             L(`D<sub>1</sub> ist bei ${r} = 5, D<sub>2</sub> bei ${s} = 5 in S, also beide nach 5 Sekunden.`) +
+             L(`Gleicher Ort <b>und</b> gleiche Zeit ⇒ Die Drohnen stoßen nach 5 s in S(10|5|10) zusammen.`) },
+      { label: "c)", text: `Prüfe dein Ergebnis auf einem zweiten Weg: Setze die Gleichungen mit <u>demselben</u> ${t} gleich.`,
+        sol: L(`${v(0,0,10)}&nbsp;+&nbsp;${t}&nbsp;· ${v(2,1,0)} = ${v(15,m+"10",10)}&nbsp;+&nbsp;${t}&nbsp;· ${v(m+"1",3,0)}`) +
+             L(`1. Zeile: 2${t} = 15 ${m} ${t} ⇒ ${t} = 5`) +
+             L(`2. Zeile: ${t} = ${m}10 + 3${t} ⇒ ${t} = 5`) +
+             L(`3. Zeile: 10 = 10 ✔`) +
+             L(`Es gibt ein gemeinsames ${t} = 5 ⇒ Zusammenstoß. ✔ Dieser Weg prüft direkt „gleicher Ort zur gleichen Zeit“.`) }
+    ]
+  },
+  {
+    topic: "Aufgabe 2 · Kurse kreuzen sich",
+    intro: `Zwei Schiffe fahren gleichzeitig los (${t} in Stunden, Koordinaten in km):<br>S<sub>1</sub>: ${xv} = ${v(0,0,0)}&nbsp;+&nbsp;${t}&nbsp;· ${v(4,3,0)} &nbsp;&nbsp; S<sub>2</sub>: ${xv} = ${v(20,0,0)}&nbsp;+&nbsp;${t}&nbsp;· ${v(m+"2",6,0)}`,
+    parts: [
+      { label: "a)", text: `Zeige, dass sich die Kurse in einem Punkt P kreuzen. Stoßen die Schiffe zusammen?`,
+        sol: L(`Bahnen mit ${r} und ${s}: 4${r} = 20 ${m} 2${s} und 3${r} = 6${s}`) +
+             L(`Aus der 2. Zeile: ${r} = 2${s}. Eingesetzt: 8${s} = 20 ${m} 2${s} ⇒ ${s} = 2, ${r} = 4`) +
+             L(`P: 4 ·&nbsp;${v(4,3,0)} = ${v(16,12,0)} ⇒ P(16|12|0)`) +
+             L(`S<sub>1</sub> ist nach 4 h in P, S<sub>2</sub> schon nach 2 h. Verschiedene Zeiten ⇒ <b>kein</b> Zusammenstoß.`) },
+      { label: "b)", text: `Wo ist S<sub>2</sub>, wenn S<sub>1</sub> in P ankommt? Wie weit sind die Schiffe dann voneinander entfernt?`,
+        sol: L(`${t} = 4: S<sub>2</sub> ist bei ${v(20,0,0)} + 4 ·&nbsp;${v(m+"2",6,0)} = ${v(12,24,0)}`) +
+             L(`Abstand: |${v(`12 ${m} 16`,`24 ${m} 12`,`0`)}| = |${v(m+"4",12,0)}| = √160 ≈ 12,6 km`) },
+      { label: "c)", text: `Wie müsste der Richtungsvektor von S<sub>2</sub> lauten (gleicher Start, gleiche Richtung), damit es zum Zusammenstoß kommt?`,
+        sol: L(`S<sub>2</sub> muss P erst nach 4 h statt nach 2 h erreichen, also halb so schnell fahren.`) +
+             L(`Neuer Richtungsvektor: ${f(1,2)}&nbsp;· ${v(m+"2",6,0)} = ${v(m+"1",3,0)}`) +
+             L(`Kontrolle: ${v(20,0,0)} + 4 ·&nbsp;${v(m+"1",3,0)} = ${v(16,12,0)} = P ✔`) }
+    ]
+  },
+  {
+    topic: "Aufgabe 3 · Finde die Fehler",
+    intro: `Zwei Flugzeuge starten gleichzeitig (${t} in Stunden, Koordinaten in km):<br>F<sub>1</sub>: ${xv} = ${v(0,0,6)}&nbsp;+&nbsp;${t}&nbsp;· ${v(400,200,2)} &nbsp;&nbsp; F<sub>2</sub>: ${xv} = ${v(1200,0,6)}&nbsp;+&nbsp;${t}&nbsp;· ${v(m+"400",400,4)}`,
+    parts: [
+      { label: "a)", text: `Mia rechnet mit den Parametern ${r} und ${s} den Schnittpunkt S(800|400|10) der Bahnen aus und schreibt: „Die Bahnen schneiden sich, also stoßen die Flugzeuge zusammen.“ Was ist falsch?`,
+        sol: L(`Der Schnittpunkt stimmt (${r} = 2, ${s} = 1). Aber ein Schnittpunkt der Bahnen bedeutet nur „gleicher Ort“.`) +
+             L(`Mia hätte die Zeiten vergleichen müssen: F<sub>1</sub> ist nach 2 h in S, F<sub>2</sub> schon nach 1 h. Also kein Zusammenstoß.`) },
+      { label: "b)", text: `Tom setzt die Gleichungen mit demselben ${t} gleich: „<span style="white-space:nowrap">400${t} = 1200 ${m} 400${t} ⇒ ${t} = 1,5</span> und <span style="white-space:nowrap">200${t} = 400${t} ⇒ ${t} = 0</span>. Widerspruch, also schneiden sich die Bahnen nicht.“ Was ist falsch?`,
+        sol: L(`Toms Rechnung zeigt nur: Es gibt <b>keinen gemeinsamen Zeitpunkt</b>, an dem beide am selben Ort sind. Also gibt es keinen Zusammenstoß. Das stimmt.`) +
+             L(`Ob sich die <b>Bahnen</b> schneiden, kann man so nicht prüfen. Dafür braucht man zwei verschiedene Parameter ${r} und ${s}. Die Bahnen schneiden sich ja in S.`) },
+      { label: "c)", text: `Formuliere eine vollständige, richtige Antwort.`,
+        sol: L(`Die Flugbahnen schneiden sich in S(800|400|10). F<sub>2</sub> erreicht S nach 1 Stunde, F<sub>1</sub> erst nach 2 Stunden.`) +
+             L(`Da die Flugzeuge nicht zur gleichen Zeit in S sind, kommt es zu keinem Zusammenstoß.`) }
+    ]
+  },
+  {
+    topic: "Aufgabe 4 · Rettungshubschrauber",
+    intro: `Hubschrauber H<sub>1</sub> fliegt von A(0|0|0) in Richtung D(12|6|4) mit 210 km/h. Gleichzeitig fliegt H<sub>2</sub> von T(0|6|4) in Richtung B(12|0|0) mit 240 km/h (Koordinaten in km).`,
+    parts: [
+      { label: "a)", text: `Stelle die Gleichungen der beiden Flugbahnen auf und bestimme ihren Schnittpunkt S.`,
+        sol: L(`h<sub>1</sub>: ${xv} = ${v(0,0,0)}&nbsp;+&nbsp;${r}&nbsp;· ${v(12,6,4)} &nbsp;&nbsp; h<sub>2</sub>: ${xv} = ${v(0,6,4)}&nbsp;+&nbsp;${s}&nbsp;· ${v(12,m+"6",m+"4")}`) +
+             L(`1. Zeile: 12${r} = 12${s} ⇒ ${r} = ${s}`) +
+             L(`2. Zeile: 6${r} = 6 ${m} 6${s} ⇒ mit ${r} = ${s}: 12${r} = 6 ⇒ ${r} = ${s} = ${f(1,2)}`) +
+             L(`3. Zeile: 4 ·&nbsp;${f(1,2)} = 4 ${m} 4 ·&nbsp;${f(1,2)} ⇒ 2 = 2 ✔`) +
+             L(`S: ${f(1,2)}&nbsp;· ${v(12,6,4)} = ${v(6,3,2)} ⇒ S(6|3|2)`) +
+             L(`Achtung: ${r} und ${s} sind hier <b>keine</b> Zeiten!`) },
+      { label: "b)", text: `Wie lange braucht jeder Hubschrauber bis S?`,
+        sol: L(`H<sub>1</sub>: |${n("AS")}| = |${v(6,3,2)}| = √49 = 7 km ⇒ 7 : 210 h = ${f(1,30)} h = 120 s`) +
+             L(`H<sub>2</sub>: |${n("TS")}| = |${v(6,m+"3",m+"2")}| = √49 = 7 km ⇒ 7 : 240 h ≈ 0,0292 h = 105 s`) },
+      { label: "c)", text: `Kommt es zum Zusammenstoß? Bewerte das Ergebnis im Sachzusammenhang.`,
+        sol: L(`H<sub>2</sub> ist 15 Sekunden vor H<sub>1</sub> in S. Mathematisch: kein Zusammenstoß.`) +
+             L(`Aber: 15 s sind sehr knapp. Hubschrauber sind keine Punkte, und kleine Abweichungen bei Geschwindigkeit oder Startzeit reichen für einen Unfall. In der Realität wäre das eine gefährliche Beinahe-Kollision.`) }
+    ]
+  },
+  {
+    topic: "Aufgabe 5 · Was, wenn einer später startet?",
+    intro: `Zwei Boote fahren entlang (${t} in Stunden, Koordinaten in km):<br>B<sub>1</sub>: ${xv} = ${v(1,2,0)}&nbsp;+&nbsp;${t}&nbsp;· ${v(3,1,0)} &nbsp;&nbsp; B<sub>2</sub>: ${xv} = ${v(9,m+"2",0)}&nbsp;+&nbsp;${t}&nbsp;· ${v(m+"1",3,0)}`,
+    parts: [
+      { label: "a)", text: `Beide starten gleichzeitig. Prüfe, ob sie zusammenstoßen.`,
+        sol: L(`Gleichsetzen mit demselben ${t}:`) +
+             L(`1. Zeile: 1 + 3${t} = 9 ${m} ${t} ⇒ ${t} = 2`) +
+             L(`2. Zeile: 2&nbsp;+&nbsp;${t} = ${m}2 + 3${t} ⇒ ${t} = 2`) +
+             L(`3. Zeile: 0 = 0 ✔`) +
+             L(`Gemeinsames ${t} = 2 ⇒ Zusammenstoß nach 2 h im Punkt ${v(1,2,0)} + 2 ·&nbsp;${v(3,1,0)} = ${v(7,4,0)}.`) },
+      { label: "b)", text: `B<sub>2</sub> startet 30 Minuten später am selben Ort. Wo ist B<sub>2</sub>, wenn B<sub>1</sub> den Punkt (7|4|0) erreicht? Wie weit sind die Boote dann voneinander entfernt?`,
+        sol: L(`Nach 2 h ist B<sub>2</sub> erst 1,5 h unterwegs:`) +
+             L(`${v(9,m+"2",0)} + 1,5 ·&nbsp;${v(m+"1",3,0)} = ${v("7,5","2,5",0)}`) +
+             L(`Abstand: |${v(`7,5 ${m} 7`,`2,5 ${m} 4`,`0`)}| = |${v("0,5",m+"1,5",0)}| = √2,5 ≈ 1,58 km`) },
+      { label: "c)", text: `Stoßen die Boote jetzt noch zusammen? Begründe.`,
+        sol: L(`Nein. B<sub>2</sub> erreicht (7|4|0) erst nach 2,5 h. Zu diesem Zeitpunkt ist B<sub>1</sub> schon weitergefahren.`) +
+             L(`Die Bahnen schneiden sich weiterhin im selben Punkt, aber eine halbe Stunde Verzögerung verhindert den Zusammenstoß.`) +
+             L(`Merke: Ob es zum Zusammenstoß kommt, hängt nicht nur von den Bahnen ab, sondern auch von Geschwindigkeit und Startzeit.`) }
+    ]
+  }
+];
+
+/* ---------- Zustand ---------- */
+const opened = tasks.map(() => new Set());
+let current = 0, justOpened = -1, scale = 1;
+try { const sc = parseFloat(localStorage.getItem("ue-scale")); if (sc >= 0.5 && sc <= 2.5) scale = sc; } catch (e) {}
+const $ = id => document.getElementById(id);
+
+function render() {
+  const task = tasks[current];
+  let html = `<div class="topic">${task.topic}</div><div class="intro">${task.intro}</div>`;
+  task.parts.forEach((p, i) => {
+    const open = opened[current].has(i);
+    html += `<div class="part" data-i="${i}">
+      <div class="part-head">
+        <div class="part-text"><span class="part-label">${p.label}</span>${p.text}</div>
+        <button class="sol-btn" aria-expanded="${open}" title="Taste ${i + 1}">${open ? "Lösung ausblenden ▴" : "Lösung anzeigen ▾"}</button>
+      </div>
+      ${open ? `<div class="sol${i === justOpened ? " new" : ""}"><span class="sol-title">Musterlösung ${p.label}</span>${p.sol}</div>` : ""}
+    </div>`;
+  });
+  $("content").innerHTML = html;
+  $("content").querySelectorAll(".part").forEach(el =>
+    el.querySelector(".sol-btn").addEventListener("click", () => toggle(+el.dataset.i)));
+
+  $("counter").textContent = `Aufgabe ${current + 1} / ${tasks.length}`;
+  $("prev").disabled = current === 0;
+  $("next").disabled = current === tasks.length - 1;
+  document.querySelectorAll(".dot").forEach((d, i) => d.classList.toggle("active", i === current));
+}
+
+function toggle(i) {
+  const set = opened[current];
+  const was = set.has(i);
+  was ? set.delete(i) : set.add(i);
+  justOpened = was ? -1 : i;
+  render();
+  justOpened = -1;
+  if (!was) {
+    const el = $("content").querySelector(`.part[data-i="${i}"] .sol`);
+    if (el) el.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }
+}
+
+function go(i) {
+  if (i < 0 || i >= tasks.length) return;
+  current = i; render(); $("main").scrollTop = 0;
+}
+
+function setScale(sc) {
+  scale = Math.min(2.5, Math.max(0.5, Math.round(sc * 10) / 10));
+  document.documentElement.style.setProperty("--scale", scale);
+  $("zoomLabel").textContent = Math.round(scale * 100) + " %";
+  try { localStorage.setItem("ue-scale", scale); } catch (e) {}
+}
+
+tasks.forEach((_, i) => {
+  const d = document.createElement("button");
+  d.className = "dot"; d.title = `Aufgabe ${i + 1}`; d.setAttribute("aria-label", `Aufgabe ${i + 1}`);
+  d.addEventListener("click", () => go(i));
+  $("dots").appendChild(d);
+});
+$("prev").addEventListener("click", () => go(current - 1));
+$("next").addEventListener("click", () => go(current + 1));
+$("zoomIn").addEventListener("click", () => setScale(scale + 0.1));
+$("zoomOut").addEventListener("click", () => setScale(scale - 0.1));
+$("reset").addEventListener("click", () => { opened[current].clear(); render(); });
+
+document.addEventListener("keydown", e => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const k = e.key;
+  if (k === "ArrowRight" || k === "PageDown") { e.preventDefault(); go(current + 1); }
+  else if (k === "ArrowLeft" || k === "PageUp") { e.preventDefault(); go(current - 1); }
+  else if (k === "+" || k === "=") setScale(scale + 0.1);
+  else if (k === "-" || k === "_") setScale(scale - 0.1);
+  else if (k === "0") setScale(1);
+  else if (/^[1-9]$/.test(k) && +k <= tasks[current].parts.length) toggle(+k - 1);
+});
+
+setScale(scale);
+render();
+</script>
+</body>
+</html>
