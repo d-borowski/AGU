@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Geraden im Raum – Hauptmenü</title>
+<style>
+  :root { --navy: #1f3a68; --green: #1b7f3b; --blue: #1d5fa8; --amber: #a35a00; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: system-ui, "Segoe UI", Roboto, Arial, sans-serif;
+    background: #f4f6fa; color: #111;
+  }
+  header { background: var(--navy); color: #fff; padding: 28px 4vw 24px; }
+  header h1 { margin: 0; font-size: clamp(30px, 3.4vw, 54px); }
+  header p { margin: 8px 0 0; font-size: clamp(18px, 1.6vw, 26px); opacity: .9; }
+  main { max-width: 1500px; margin: 0 auto; padding: 24px 4vw 48px; font-size: clamp(18px, 1.5vw, 26px); }
+
+  h2 {
+    font-size: .8em; letter-spacing: .07em; text-transform: uppercase; color: #5a6475;
+    margin: 1.4em 0 .6em;
+  }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 18px; }
+
+  a.card {
+    display: flex; gap: 12px; align-items: flex-start; text-decoration: none; color: inherit;
+    background: #fff; border: 3px solid #d5dbe6; border-left-width: 10px; border-radius: 12px;
+    padding: 16px 16px; transition: transform .12s, box-shadow .12s, border-color .12s;
+  }
+  a.card:hover, a.card:focus-visible { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,.1); outline: none; }
+  a.card:focus-visible { border-color: #f2b705; }
+  .num {
+    flex: none; width: 2.2em; height: 2.2em; border-radius: 50%; display: grid; place-items: center;
+    font-weight: 800; color: #fff;
+  }
+  .card h3 { margin: 0 0 .25em; font-size: 1.1em; hyphens: auto; overflow-wrap: anywhere; }
+  .card p { margin: 0; color: #444; line-height: 1.45; font-size: .9em; }
+  .tag { display: inline-block; margin-top: .5em; font-size: .72em; font-weight: 700; padding: .15em .6em; border-radius: 999px; }
+
+  .diag   { border-left-color: var(--amber); }
+  .diag .num { background: var(--amber); }
+  .diag .tag { background: #fbeedd; color: var(--amber); }
+  .ueb    { border-left-color: var(--blue); }
+  .ueb .num { background: var(--blue); }
+  .ueb .tag { background: #e3eefa; color: var(--blue); }
+  .exit   { border-left-color: var(--green); }
+  .exit .num { background: var(--green); }
+  .exit .tag { background: #e3f4e8; color: var(--green); }
+
+  .flow {
+    display: flex; flex-wrap: wrap; align-items: center; gap: .5em; margin-top: 1.6em;
+    background: #fff; border: 2px dashed #c4ccda; border-radius: 12px; padding: 14px 20px; font-size: .9em;
+  }
+  .flow b { color: var(--navy); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Geraden im Raum</h1>
+  <p>Diagnose · Übungen · Abschluss</p>
+</header>
+
+<main>
+  <h2>1 · Einstieg</h2>
+  <div class="grid">
+    <a class="card diag" href="Diagnosefragen_Geraden.html">
+      <span class="num">D</span>
+      <div>
+        <h3>Eingangsdiagnose</h3>
+        <p>5 Fragen zu Geraden: Wo stehst du gerade?</p>
+      </div>
+    </a>
+  </div>
+
+  <h2>2 · Übungen: Starte mit der Übung zu deiner falsch beantworteten Frage</h2>
+  <div class="grid">
+    <a class="card ueb" href="Uebung_Gerade_durch_zwei_Punkte.html">
+      <span class="num">1</span>
+      <div>
+        <h3>Gerade durch zwei Punkte</h3>
+        <p>Stützvektor und Richtungsvektor richtig wählen.</p>
+        <span class="tag">zu Frage 1</span>
+      </div>
+    </a>
+    <a class="card ueb" href="Uebung_Punktprobe.html">
+      <span class="num">2</span>
+      <div>
+        <h3>Punktprobe</h3>
+        <p>Liegt ein Punkt auf der Geraden? Alle drei Zeilen prüfen!</p>
+        <span class="tag">zu Frage 2</span>
+      </div>
+    </a>
+    <a class="card ueb" href="Uebung_Gerade_oder_Strecke.html">
+      <span class="num">3</span>
+      <div>
+        <h3>Gerade oder Strecke?</h3>
+        <p>Was der Parameter t verrät: Wo hört es auf?</p>
+        <span class="tag">zu Frage 3</span>
+      </div>
+    </a>
+    <a class="card ueb" href="Uebung_Geschwindigkeit.html">
+      <span class="num">4</span>
+      <div>
+        <h3>Geschwindigkeit</h3>
+        <p>Gleichförmige Bewegungen: Parameter oder Zeit?</p>
+        <span class="tag">zu Frage 4</span>
+      </div>
+    </a>
+    <a class="card ueb" href="Uebung_Schnittpunkt_oder_Zusammenstoss.html">
+      <span class="num">5</span>
+      <div>
+        <h3>Schnittpunkt oder Zusammenstoß?</h3>
+        <p>Gleicher Ort <b>und</b> gleiche Zeit.</p>
+        <span class="tag">zu Frage 5</span>
+      </div>
+    </a>
+  </div>
+
+  <h2>3 · Abschluss</h2>
+  <div class="grid">
+    <a class="card exit" href="Abschlussdiagnose_Geraden.html">
+      <span class="num">A</span>
+      <div>
+        <h3>Abschlussdiagnose</h3>
+        <p>5 Zwillingsfragen: Was hat sich verbessert?</p>
+      </div>
+    </a>
+  </div>
+
+  <div class="flow">
+    <b>So gehst du vor:</b> Eingangsdiagnose → Übung zu deiner Lücke (erst rechnen, dann Lösung aufdecken) → Übungen 4 und 5 → Abschlussdiagnose
+  </div>
+</main>
+</body>
+</html>
