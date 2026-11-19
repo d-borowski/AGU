@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Übung – Parameter zu einem gegebenen Punkt</title>
+<style>
+  :root { --scale: 1; --navy: #1f3a68; --sol: #1d5fa8; }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; display: flex; flex-direction: column;
+    font-family: system-ui, "Segoe UI", Roboto, Arial, sans-serif;
+    background: #fff; color: #111;
+  }
+
+  header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 4vw; background: var(--navy); color: #fff; font-size: 20px;
+  }
+  header .title { font-weight: 700; }
+  header a.menu { color: #fff; text-decoration: none; border: 2px solid rgba(255,255,255,.6); border-radius: 6px; padding: 2px 10px; margin-right: 14px; font-weight: 600; }
+  header a.menu:hover { background: rgba(255,255,255,.18); }
+  header .counter { font-weight: 600; opacity: .9; }
+
+  main {
+    flex: 1; overflow-y: auto;
+    font-size: calc(clamp(22px, 2.2vw, 44px) * var(--scale));
+    padding: 1em 4vw 2em;
+  }
+  .wrap { max-width: 1600px; margin: 0 auto; }
+  .topic {
+    font-size: .62em; font-weight: 700; letter-spacing: .06em;
+    text-transform: uppercase; color: #5a6475; margin-bottom: .3em;
+  }
+  .intro { font-size: 1.05em; font-weight: 600; line-height: 1.55; margin-bottom: .8em; }
+
+  .part {
+    border: 3px solid #cdd5e3; border-radius: .4em; background: #f6f8fb;
+    padding: .5em .8em; margin-bottom: .55em;
+  }
+  .part-head { display: flex; align-items: center; gap: .8em; flex-wrap: wrap; justify-content: space-between; }
+  .part-text { flex: 1 1 60%; line-height: 1.55; }
+  .part-label { font-weight: 800; color: var(--navy); margin-right: .3em; }
+
+  .sol-btn {
+    flex: none; font: inherit; font-size: .7em; font-weight: 700; cursor: pointer;
+    color: var(--sol); background: #fff; border: 2px solid var(--sol); border-radius: .4em;
+    padding: .3em .7em;
+  }
+  .sol-btn:hover, .sol-btn[aria-expanded="true"] { background: var(--sol); color: #fff; }
+  .sol-btn:focus-visible { outline: 4px solid #f2b705; outline-offset: 2px; }
+
+  .sol {
+    margin-top: .5em; padding: .55em .9em; border-left: .3em solid var(--sol);
+    background: #e9f1fb; border-radius: .3em; line-height: 1.6; font-size: .92em;
+  }
+  .sol.new { animation: fade .25s ease-out; }
+  .sol .sol-title { font-weight: 800; color: var(--sol); margin-right: .35em; }
+  .sol .line { margin: .25em 0; }
+  @keyframes fade { from { opacity: 0; transform: translateY(-.2em); } to { opacity: 1; transform: none; } }
+
+  /* Mathe */
+  .cv { display: inline-flex; vertical-align: middle; margin: 0 .12em; }
+  .cv-in {
+    display: inline-flex; flex-direction: column; align-items: center;
+    padding: 0 .35em; line-height: 1.12; font-size: .82em;
+    border-left: .09em solid currentColor; border-right: .09em solid currentColor;
+    border-radius: .55em;
+  }
+  .vn { position: relative; display: inline-block; font-style: italic; }
+  .vn::before {
+    content: "\2192"; position: absolute; left: 50%; top: -.68em;
+    transform: translateX(-50%); font-size: .7em; font-style: normal; line-height: 1;
+  }
+  .vn.two::before { transform: translateX(-50%) scaleX(1.9); }
+  .fr { display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; font-size: .8em; line-height: 1.05; margin: 0 .1em; }
+  .fr > span:first-child { border-bottom: .07em solid currentColor; padding: 0 .1em; }
+  i.var { font-family: "Cambria Math", "Times New Roman", serif; }
+  .blank { display: inline-block; min-width: 1.6em; border-bottom: .08em solid currentColor; height: 1em; }
+  .cv .blank { min-width: 1.3em; margin: .08em 0; }
+
+  footer {
+    display: flex; justify-content: space-between; align-items: center; gap: 16px;
+    padding: 10px 4vw; border-top: 2px solid #e2e6ee; background: #f7f8fb; font-size: 20px;
+  }
+  .group { display: flex; align-items: center; gap: 8px; }
+  footer button {
+    font: inherit; font-weight: 700; cursor: pointer; color: var(--navy);
+    background: #fff; border: 2px solid var(--navy); border-radius: 8px; padding: 8px 16px;
+  }
+  footer button:hover:not(:disabled) { background: var(--navy); color: #fff; }
+  footer button:disabled { opacity: .35; cursor: default; }
+  .dots { display: flex; gap: 10px; }
+  .dot {
+    width: 18px; height: 18px; padding: 0 !important; border-radius: 50% !important;
+    border: 2px solid var(--navy) !important; background: #fff;
+  }
+  .dot.active { background: var(--navy) !important; }
+  #zoomLabel { min-width: 3.4em; text-align: center; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="title"><a class="menu" href="Ebenen.html" title="Zum Hauptmenü">&#8962; Menü</a>Übung Ebenen: Parameter zu einem gegebenen Punkt</span>
+  <span class="counter" id="counter"></span>
+</header>
+
+<main id="main"><div class="wrap" id="content"></div></main>
+
+<footer>
+  <div class="group">
+    <button id="prev" title="Zurück (Pfeil links)">&larr; Zurück</button>
+    <button id="next" title="Weiter (Pfeil rechts)">Weiter &rarr;</button>
+  </div>
+  <div class="dots" id="dots"></div>
+  <div class="group">
+    <button id="reset" title="Alle Lösungen dieser Aufgabe ausblenden">Lösungen ausblenden</button>
+    <button id="zoomOut" title="Schrift kleiner (−)">A−</button>
+    <span id="zoomLabel">100 %</span>
+    <button id="zoomIn" title="Schrift größer (+)">A+</button>
+  </div>
+</footer>
+
+<script>
+/* ---------- Mathe-Hilfen ---------- */
+const v  = (...c) => `<span class="cv"><span class="cv-in">${c.map(x => `<span>${x}</span>`).join("")}</span></span>`;
+const n  = s => `<span class="vn${s.length > 1 ? " two" : ""}">${s}</span>`;
+const f  = (a, b) => `<span class="fr"><span>${a}</span><span>${b}</span></span>`;
+const t  = `<i class="var">t</i>`;
+const s  = `<i class="var">s</i>`;
+const m  = "−";
+const xv = n("x");
+const B  = `<span class="blank"></span>`;
+const L  = html => `<div class="line">${html}</div>`;
+
+/* ---------- Aufgaben ---------- */
+const r = `<i class="var">r</i>`;
+const tasks = [
+  {
+    topic: "Aufgabe 1 · Schritt für Schritt",
+    intro: `Die Skater-Ebene ist E: ${xv} = ${v(1,1,0)}&nbsp;+&nbsp;${r}&nbsp;· ${v(4,0,0)}&nbsp;+&nbsp;${s}&nbsp;· ${v(0,2,2)}.<br>Welche Parameter ${r} und ${s} gehören zum Punkt P(3|2|1)?`,
+    parts: [
+      { label: "a)", text: `Setze ${n("OP")} für ${xv} ein und schreibe das Gleichungssystem zeilenweise auf.`,
+        sol: L(`${v(3,2,1)} = ${v(1,1,0)}&nbsp;+&nbsp;${r}&nbsp;· ${v(4,0,0)}&nbsp;+&nbsp;${s}&nbsp;· ${v(0,2,2)}`) +
+             L(`1. Zeile: 3 = 1 + 4${r}`) + L(`2. Zeile: 2 = 1 + 2${s}`) + L(`3. Zeile: 1 = 2${s}`) },
+      { label: "b)", text: `Bestimme ${r} aus der 1. Zeile und ${s} aus der 2. Zeile.`,
+        sol: L(`1. Zeile: 4${r} = 2 ⇒ ${r} = 0,5`) + L(`2. Zeile: 2${s} = 1 ⇒ ${s} = 0,5`) },
+      { label: "c)", text: `Kontrolliere mit der 3. Zeile.`,
+        sol: L(`3. Zeile: 2 · 0,5 = 1 ✔`) + L(`P gehört zu ${r} = 0,5 und ${s} = 0,5.`) +
+             L(`Wichtig: Die 3. Zeile muss auch stimmen. Sonst gäbe es keine passenden Parameter.`) }
+    ]
+  },
+  {
+    topic: "Aufgabe 2 · Selbstständig",
+    intro: `Bestimme in der Skater-Ebene E: ${xv} = ${v(1,1,0)}&nbsp;+&nbsp;${r}&nbsp;· ${v(4,0,0)}&nbsp;+&nbsp;${s}&nbsp;· ${v(0,2,2)} die Parameter zu den Punkten.`,
+    parts: [
+      { label: "a)", text: `Q(7|5|4)`,
+        sol: L(`1. Zeile: 7 = 1 + 4${r} ⇒ ${r} = 1,5`) + L(`2. Zeile: 5 = 1 + 2${s} ⇒ ${s} = 2`) + L(`3. Zeile: 4 = 2 · 2 ✔`) +
+             L(`Q gehört zu ${r} = 1,5 und ${s} = 2.`) },
+      { label: "b)", text: `R(${m}1|0|${m}1)`,
+        sol: L(`1. Zeile: ${m}1 = 1 + 4${r} ⇒ ${r} = ${m}0,5`) + L(`2. Zeile: 0 = 1 + 2${s} ⇒ ${s} = ${m}0,5`) + L(`3. Zeile: ${m}1 = 2 · (${m}0,5) ✔`) +
+             L(`R gehört zu ${r} = ${m}0,5 und ${s} = ${m}0,5.`) }
+    ]
+  },
+  {
+    topic: "Aufgabe 3 · Beide Parameter in einer Zeile",
+    intro: `Gegeben ist F: ${xv} = ${v(0,1,2)}&nbsp;+&nbsp;${r}&nbsp;· ${v(1,1,0)}&nbsp;+&nbsp;${s}&nbsp;· ${v(0,1,2)}.<br>Hier stehen in einer Zeile beide Parameter. Tipp: Beginne mit der Zeile, in der nur ein Parameter vorkommt.`,
+    parts: [
+      { label: "a)", text: `Bestimme die Parameter zum Punkt P(2|5|6).`,
+        sol: L(`1. Zeile: 2 = ${r} ⇒ ${r} = 2`) +
+             L(`3. Zeile: 6 = 2 + 2${s} ⇒ ${s} = 2`) +
+             L(`2. Zeile (Kontrolle): 1 + 2 + 2 = 5 ✔`) +
+             L(`P gehört zu ${r} = 2 und ${s} = 2.`) },
+      { label: "b)", text: `Bestimme die Parameter zum Punkt Q(3|3|0).`,
+        sol: L(`1. Zeile: 3 = ${r} ⇒ ${r} = 3`) +
+             L(`3. Zeile: 0 = 2 + 2${s} ⇒ ${s} = ${m}1`) +
+             L(`2. Zeile (Kontrolle): 1 + 3 + (${m}1) = 3 ✔`) +
+             L(`Q gehört zu ${r} = 3 und ${s} = ${m}1.`) }
+    ]
+  },
+  {
+    topic: "Aufgabe 4 · Finde den Fehler",
+    intro: `Tim soll in der Skater-Ebene E: ${xv} = ${v(1,1,0)}&nbsp;+&nbsp;${r}&nbsp;· ${v(4,0,0)}&nbsp;+&nbsp;${s}&nbsp;· ${v(0,2,2)} die Parameter zum Punkt P(5|2|1) bestimmen. Er schreibt: „${r} = 5 und ${s} = 2“.`,
+    parts: [
+      { label: "a)", text: `Zeige, dass Tims Parameter nicht zu P führen.`,
+        sol: L(`${v(1,1,0)} + 5 ·&nbsp;${v(4,0,0)} + 2 ·&nbsp;${v(0,2,2)} = ${v(21,5,4)} ≠ ${v(5,2,1)}`) },
+      { label: "b)", text: `Beschreibe Tims Denkfehler.`,
+        sol: L(`Tim hat die Koordinaten des Punktes als Parameter genommen. Die Parameter geben aber an, <b>wie oft</b> man die Spannvektoren vom Stützpunkt aus geht.`) },
+      { label: "c)", text: `Bestimme die richtigen Parameter.`,
+        sol: L(`1. Zeile: 5 = 1 + 4${r} ⇒ ${r} = 1`) + L(`2. Zeile: 2 = 1 + 2${s} ⇒ ${s} = 0,5`) + L(`3. Zeile: 1 = 2 · 0,5 ✔`) +
+             L(`P gehört zu ${r} = 1 und ${s} = 0,5.`) }
+    ]
+  },
+  {
+    topic: "Aufgabe 5 · Rückwärts denken (Ausblick)",
+    intro: `Wir bleiben bei der Skater-Ebene E: ${xv} = ${v(1,1,0)}&nbsp;+&nbsp;${r}&nbsp;· ${v(4,0,0)}&nbsp;+&nbsp;${s}&nbsp;· ${v(0,2,2)}.`,
+    parts: [
+      { label: "a)", text: `Bestimme die Zahl c so, dass der Punkt U(3|2|c) in E liegt.`,
+        sol: L(`1. Zeile: 3 = 1 + 4${r} ⇒ ${r} = 0,5`) + L(`2. Zeile: 2 = 1 + 2${s} ⇒ ${s} = 0,5`) +
+             L(`3. Zeile: c = 2 · 0,5 = 1`) + L(`Für c = 1 liegt U(3|2|1) in E.`) },
+      { label: "b)", text: `Begründe, warum der Punkt V(3|2|5) nicht in E liegt.`,
+        sol: L(`Aus der 1. und 2. Zeile folgt wie in a) ${r} = 0,5 und ${s} = 0,5.`) +
+             L(`3. Zeile: 5 = 2${s} ⇒ ${s} = 2,5. Das widerspricht ${s} = 0,5.`) +
+             L(`Es gibt keine passenden Parameter, also liegt V nicht in E.`) +
+             L(`<b>Ausblick:</b> Genau so funktioniert die <b>Punktprobe</b> für Ebenen, die ihr bald kennenlernt.`) }
+    ]
+  }
+];
+
+/* ---------- Zustand ---------- */
+const opened = tasks.map(() => new Set());
+let current = 0, justOpened = -1, scale = 1;
+try { const sc = parseFloat(localStorage.getItem("ue-scale")); if (sc >= 0.5 && sc <= 2.5) scale = sc; } catch (e) {}
+const $ = id => document.getElementById(id);
+
+function render() {
+  const task = tasks[current];
+  let html = `<div class="topic">${task.topic}</div><div class="intro">${task.intro}</div>`;
+  task.parts.forEach((p, i) => {
+    const open = opened[current].has(i);
+    html += `<div class="part" data-i="${i}">
+      <div class="part-head">
+        <div class="part-text"><span class="part-label">${p.label}</span>${p.text}</div>
+        <button class="sol-btn" aria-expanded="${open}" title="Taste ${i + 1}">${open ? "Lösung ausblenden ▴" : "Lösung anzeigen ▾"}</button>
+      </div>
+      ${open ? `<div class="sol${i === justOpened ? " new" : ""}"><span class="sol-title">Musterlösung ${p.label}</span>${p.sol}</div>` : ""}
+    </div>`;
+  });
+  $("content").innerHTML = html;
+  $("content").querySelectorAll(".part").forEach(el =>
+    el.querySelector(".sol-btn").addEventListener("click", () => toggle(+el.dataset.i)));
+
+  $("counter").textContent = `Aufgabe ${current + 1} / ${tasks.length}`;
+  $("prev").disabled = current === 0;
+  $("next").disabled = current === tasks.length - 1;
+  document.querySelectorAll(".dot").forEach((d, i) => d.classList.toggle("active", i === current));
+}
+
+function toggle(i) {
+  const set = opened[current];
+  const was = set.has(i);
+  was ? set.delete(i) : set.add(i);
+  justOpened = was ? -1 : i;
+  render();
+  justOpened = -1;
+  if (!was) {
+    const el = $("content").querySelector(`.part[data-i="${i}"] .sol`);
+    if (el) el.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }
+}
+
+function go(i) {
+  if (i < 0 || i >= tasks.length) return;
+  current = i; render(); $("main").scrollTop = 0;
+}
+
+function setScale(sc) {
+  scale = Math.min(2.5, Math.max(0.5, Math.round(sc * 10) / 10));
+  document.documentElement.style.setProperty("--scale", scale);
+  $("zoomLabel").textContent = Math.round(scale * 100) + " %";
+  try { localStorage.setItem("ue-scale", scale); } catch (e) {}
+}
+
+tasks.forEach((_, i) => {
+  const d = document.createElement("button");
+  d.className = "dot"; d.title = `Aufgabe ${i + 1}`; d.setAttribute("aria-label", `Aufgabe ${i + 1}`);
+  d.addEventListener("click", () => go(i));
+  $("dots").appendChild(d);
+});
+$("prev").addEventListener("click", () => go(current - 1));
+$("next").addEventListener("click", () => go(current + 1));
+$("zoomIn").addEventListener("click", () => setScale(scale + 0.1));
+$("zoomOut").addEventListener("click", () => setScale(scale - 0.1));
+$("reset").addEventListener("click", () => { opened[current].clear(); render(); });
+
+document.addEventListener("keydown", e => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const k = e.key;
+  if (k === "ArrowRight" || k === "PageDown") { e.preventDefault(); go(current + 1); }
+  else if (k === "ArrowLeft" || k === "PageUp") { e.preventDefault(); go(current - 1); }
+  else if (k === "+" || k === "=") setScale(scale + 0.1);
+  else if (k === "-" || k === "_") setScale(scale - 0.1);
+  else if (k === "0") setScale(1);
+  else if (/^[1-9]$/.test(k) && +k <= tasks[current].parts.length) toggle(+k - 1);
+});
+
+setScale(scale);
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diagnose – Ebenen in Parameterform</title>
+<style>
+  :root { --scale: 1; --navy: #1f3a68; --green: #1b7f3b; --red: #c62828; }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; display: flex; flex-direction: column;
+    font-family: system-ui, "Segoe UI", Roboto, Arial, sans-serif;
+    background: #fff; color: #111;
+  }
+
+  /* ---------- Kopfzeile ---------- */
+  header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 4vw; background: var(--navy); color: #fff; font-size: 20px;
+  }
+  header .title { font-weight: 700; }
+  header a.menu { color: #fff; text-decoration: none; border: 2px solid rgba(255,255,255,.6); border-radius: 6px; padding: 2px 10px; margin-right: 14px; font-weight: 600; }
+  header a.menu:hover { background: rgba(255,255,255,.18); }
+  header .counter { font-weight: 600; opacity: .9; }
+
+  /* ---------- Inhalt (skaliert) ---------- */
+  main {
+    flex: 1; overflow-y: auto;
+    font-size: calc(clamp(22px, 2.3vw, 46px) * var(--scale));
+    padding: 1em 4vw 2em;
+  }
+  .wrap { max-width: 1600px; margin: 0 auto; }
+  .topic {
+    font-size: .62em; font-weight: 700; letter-spacing: .06em;
+    text-transform: uppercase; color: #5a6475; margin-bottom: .3em;
+  }
+  .stem { font-size: 1.08em; font-weight: 600; line-height: 1.45; margin-bottom: .9em; }
+  .opts { display: flex; flex-direction: column; gap: .45em; }
+
+  .opt-btn {
+    display: flex; align-items: center; gap: .7em; width: 100%;
+    font: inherit; color: inherit; text-align: left; line-height: 1.4;
+    background: #f3f5f9; border: 3px solid #cdd5e3; border-radius: .4em;
+    padding: .4em .7em; cursor: pointer; transition: background .15s, border-color .15s;
+  }
+  .opt-btn:hover { border-color: var(--navy); }
+  .opt-btn:focus-visible { outline: 4px solid #f2b705; outline-offset: 2px; }
+  .badge {
+    flex: none; width: 1.8em; height: 1.8em; border-radius: 50%;
+    display: grid; place-items: center; font-weight: 700;
+    background: var(--navy); color: #fff;
+  }
+  .opt.correct .opt-btn { border-color: var(--green); background: #e6f5ea; }
+  .opt.correct .badge   { background: var(--green); }
+  .opt.wrong .opt-btn   { border-color: var(--red); background: #fdecec; }
+  .opt.wrong .badge     { background: var(--red); }
+
+  .fb {
+    margin: .35em 0 .25em 2.5em; padding: .55em .9em;
+    border-left: .3em solid; border-radius: .3em;
+    font-size: .86em; line-height: 1.7;
+  }
+  .fb.new { animation: fade .25s ease-out; }
+  .fb.correct { background: #e6f5ea; border-color: var(--green); }
+  .fb.wrong   { background: #fdecec; border-color: var(--red); }
+  .verdict { font-weight: 800; margin-right: .35em; }
+  .fb.correct .verdict { color: var(--green); }
+  .fb.wrong .verdict   { color: var(--red); }
+  @keyframes fade { from { opacity: 0; transform: translateY(-.2em); } to { opacity: 1; transform: none; } }
+
+  /* ---------- Mathe-Darstellung ---------- */
+  .cv { display: inline-flex; vertical-align: middle; margin: 0 .12em; }
+  .cv-in {
+    display: inline-flex; flex-direction: column; align-items: center;
+    padding: 0 .35em; line-height: 1.1; font-size: .82em;
+    border-left: .09em solid currentColor; border-right: .09em solid currentColor;
+    border-radius: .55em;
+  }
+  .vn { position: relative; display: inline-block; font-style: italic; }
+  .vn::before {
+    content: "\2192"; position: absolute; left: 50%; top: -.68em;
+    transform: translateX(-50%); font-size: .7em; font-style: normal; line-height: 1;
+  }
+  .vn.two::before { transform: translateX(-50%) scaleX(1.9); }
+  .fr { display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; font-size: .8em; line-height: 1.05; margin: 0 .1em; }
+  .fr > span:first-child { border-bottom: .07em solid currentColor; padding: 0 .1em; }
+  i.var { font-family: "Cambria Math", "Times New Roman", serif; }
+
+  /* ---------- Fußzeile ---------- */
+  footer {
+    display: flex; justify-content: space-between; align-items: center; gap: 16px;
+    padding: 10px 4vw; border-top: 2px solid #e2e6ee; background: #f7f8fb; font-size: 20px;
+  }
+  .group { display: flex; align-items: center; gap: 8px; }
+  footer button {
+    font: inherit; font-weight: 700; cursor: pointer; color: var(--navy);
+    background: #fff; border: 2px solid var(--navy); border-radius: 8px; padding: 8px 16px;
+  }
+  footer button:hover:not(:disabled) { background: var(--navy); color: #fff; }
+  footer button:disabled { opacity: .35; cursor: default; }
+  .dots { display: flex; gap: 10px; }
+  .dot {
+    width: 18px; height: 18px; padding: 0 !important; border-radius: 50% !important;
+    border: 2px solid var(--navy) !important; background: #fff;
+  }
+  .dot.active { background: var(--navy) !important; }
+  #zoomLabel { min-width: 3.4em; text-align: center; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="title"><a class="menu" href="Ebenen.html" title="Zum Hauptmenü">&#8962; Menü</a>Diagnose: Ebenen in Parameterform</span>
+  <span class="counter" id="counter"></span>
+</header>
+
+<main id="main"><div class="wrap" id="content"></div></main>
+
+<footer>
+  <div class="group">
+    <button id="prev" title="Zurück (Pfeil links)">&larr; Zurück</button>
+    <button id="next" title="Weiter (Pfeil rechts)">Weiter &rarr;</button>
+  </div>
+  <div class="dots" id="dots"></div>
+  <div class="group">
+    <button id="reset" title="Feedback dieser Frage ausblenden">Zurücksetzen</button>
+    <button id="zoomOut" title="Schrift kleiner (−)">A−</button>
+    <span id="zoomLabel">100 %</span>
+    <button id="zoomIn" title="Schrift größer (+)">A+</button>
+  </div>
+</footer>
+
+<script>
+/* ---------- Hilfsfunktionen für Mathe ---------- */
+const v  = (...c) => `<span class="cv"><span class="cv-in">${c.map(x => `<span>${x}</span>`).join("")}</span></span>`;
+const n  = s => `<span class="vn${s.length > 1 ? " two" : ""}">${s}</span>`;
+const f  = (a, b) => `<span class="fr"><span>${a}</span><span>${b}</span></span>`;
+const t  = `<i class="var">t</i>`;
+const m  = "−"; // echtes Minuszeichen
+const xv = n("x");
+
+/* ---------- Fragen ---------- */
+const r = `<i class="var">r</i>`;
+const s = `<i class="var">s</i>`;
+const E = `E: ${xv} = ${v(1,1,0)}&nbsp;+&nbsp;${r}&nbsp;· ${v(4,0,0)}&nbsp;+&nbsp;${s}&nbsp;· ${v(0,2,2)}`;
+const questions = [
+  {
+    topic: "Frage 1 · Stützvektor und Spannvektoren",
+    stem: `Gegeben ist die Ebene ${E}.<br>Welche Aussage ist richtig?`,
+    options: [
+      { text: `Der Stützvektor führt zu einem Punkt der Ebene. Die Spannvektoren geben zwei Richtungen an, in die man sich in der Ebene bewegen kann.`, correct: true,
+        fb: `Genau. ${v(1,1,0)} ist der Ortsvektor des Punktes A(1|1|0), der in der Ebene liegt. Von dort aus kommst du mit Vielfachen von ${v(4,0,0)} und ${v(0,2,2)} zu jedem anderen Punkt der Ebene.` },
+      { text: `Alle drei Vektoren sind Ortsvektoren von Punkten der Ebene.`, correct: false,
+        fb: `Nur der Stützvektor ist ein Ortsvektor. Die Spannvektoren sind <b>Verschiebungen</b>: ${v(4,0,0)} heißt „gehe 4 Einheiten in x-Richtung“, nicht „gehe zum Punkt (4|0|0)“. Der Punkt (4|0|0) liegt übrigens gar nicht in E.` },
+      { text: `Die Spannvektoren legen fest, wie groß die Ebene ist.`, correct: false,
+        fb: `Eine Ebene ist unbegrenzt, denn ${r} und ${s} dürfen beliebige reelle Zahlen sein. Die Spannvektoren geben nur die Richtungen an. Begrenzt ist erst die Plattform, wenn man ${r} und ${s} einschränkt.` },
+      { text: `Der Stützvektor gibt die Richtung an, in der die Ebene liegt.`, correct: false,
+        fb: `Der Stützvektor gibt keine Richtung an, sondern einen <b>Startpunkt</b> in der Ebene. Die Richtungen stecken in den beiden Spannvektoren.` }
+    ]
+  },
+  {
+    topic: "Frage 2 · Punkt zu gegebenen Parametern",
+    stem: `Gegeben ist die Ebene ${E}.<br>Welcher Punkt gehört zu ${r} = 0,5 und ${s} = 1?`,
+    options: [
+      { text: `(2 | 2 | 2)`, correct: false,
+        fb: `Du hast den Stützvektor vergessen. 0,5 ·&nbsp;${v(4,0,0)} + 1 ·&nbsp;${v(0,2,2)} = ${v(2,2,2)} ist nur die Verschiebung. Du startest aber nicht im Ursprung, sondern in A(1|1|0).` },
+      { text: `(5 | 2 | 1)`, correct: false,
+        fb: `Du hast ${r} und ${s} vertauscht. Das ist der Punkt zu ${r} = 1 und ${s} = 0,5. Achte darauf, welcher Parameter zu welchem Spannvektor gehört.` },
+      { text: `(3 | 3 | 2)`, correct: true,
+        fb: `${v(1,1,0)} + 0,5 ·&nbsp;${v(4,0,0)} + 1 ·&nbsp;${v(0,2,2)} = ${v(1,1,0)}&nbsp;+&nbsp;${v(2,0,0)}&nbsp;+&nbsp;${v(0,2,2)} = ${v(3,3,2)}. Du startest in A, gehst den halben ersten Spannvektor und den ganzen zweiten.` },
+      { text: `(3 | 2 | 1)`, correct: false,
+        fb: `Du hast beide Spannvektoren mit 0,5 multipliziert. Der zweite Spannvektor gehört aber zu ${s} = 1 und wird ganz gegangen.` }
+    ]
+  },
+  {
+    topic: "Frage 3 · Parameter zu einem gegebenen Punkt",
+    stem: `Gegeben ist die Ebene ${E}.<br>Welche Parameter gehören zum Punkt P(5|2|1)?`,
+    options: [
+      { text: `${r} = 0,5 und ${s} = 1`, correct: false,
+        fb: `Damit erhältst du ${v(3,3,2)}, nicht P. Du hast ${r} und ${s} vertauscht.` },
+      { text: `${r} = 1 und ${s} = 0,5`, correct: true,
+        fb: `${v(1,1,0)} + 1 ·&nbsp;${v(4,0,0)} + 0,5 ·&nbsp;${v(0,2,2)} = ${v(5,2,1)}. Vom Stützpunkt aus brauchst du die Verschiebung ${v(4,1,1)}: einmal den ersten Spannvektor (x: +4) und einen halben zweiten (y und z: je +1).` },
+      { text: `${r} = 5 und ${s} = 2`, correct: false,
+        fb: `Die Parameter sind nicht die Koordinaten des Punktes. Sie geben an, <b>wie oft</b> man jeden Spannvektor geht. Mit ${r} = 5 und ${s} = 2 landest du bei (21|5|4).` },
+      { text: `${r} = 1 und ${s} = 1`, correct: false,
+        fb: `Damit erhältst du ${v(5,3,2)}, nicht P. Prüfe die y-Koordinate: Von 1 auf 2 ist nur +1, der zweite Spannvektor bringt aber +2 pro Einheit. Also ist ${s} = 0,5.` }
+    ]
+  },
+  {
+    topic: "Frage 4 · Ebene oder Plattform?",
+    stem: `Die Skater-Plattform ist das Dreieck ABC mit A(1|1|0), B(5|1|0) und C(1|3|2). Sie liegt in der Ebene<br>E: ${xv} = ${n("OA")}&nbsp;+&nbsp;${r}&nbsp;· ${n("AB")}&nbsp;+&nbsp;${s}&nbsp;· ${n("AC")} = ${v(1,1,0)}&nbsp;+&nbsp;${r}&nbsp;· ${v(4,0,0)}&nbsp;+&nbsp;${s}&nbsp;· ${v(0,2,2)}.<br>Für welche Parameter liegt der zugehörige Punkt zwar in E, aber <u>nicht</u> auf der Plattform?`,
+    options: [
+      { text: `${r} = 0 und ${s} = 0`, correct: false,
+        fb: `Das ist der Stützpunkt A(1|1|0), also eine Ecke der Plattform. Er liegt auf der Plattform.` },
+      { text: `${r} = 0,2 und ${s} = 0,3`, correct: false,
+        fb: `Das ergibt (1,8|1,6|0,6). Du gehst nur ein kleines Stück in Richtung B und ein kleines Stück in Richtung C. Der Punkt liegt innerhalb des Dreiecks, also auf der Plattform.` },
+      { text: `${r} = 0,5 und ${s} = 0,5`, correct: false,
+        fb: `Das ergibt (3|2|1), genau den Mittelpunkt der Kante BC. Der Punkt liegt auf dem Rand der Plattform, also noch darauf.` },
+      { text: `${r} = 1 und ${s} = 1`, correct: true,
+        fb: `Das ergibt (5|3|2). Du gehst einmal ganz nach B und dann noch einmal die ganze Strecke ${n("AC")}. Damit landest du außerhalb des Dreiecks: Der Punkt liegt in der Ebene, aber nicht auf der Plattform. Auf der Plattform liegen nur Punkte mit ${r} ≥ 0, ${s} ≥ 0 und ${r}&nbsp;+&nbsp;${s} ≤ 1.` }
+    ]
+  },
+  {
+    topic: "Frage 5 · Wann ist es eine Ebene?",
+    stem: `Jemand schreibt: ${xv} = ${v(1,1,0)}&nbsp;+&nbsp;${r}&nbsp;· ${v(2,1,0)}&nbsp;+&nbsp;${s}&nbsp;· ${v(4,2,0)}.<br>Was beschreibt diese Gleichung?`,
+    options: [
+      { text: `Eine Ebene durch den Punkt (1|1|0).`, correct: false,
+        fb: `Für eine Ebene braucht man zwei <b>verschiedene</b> Richtungen. Hier ist ${v(4,2,0)} = 2 ·&nbsp;${v(2,1,0)}. Beide Spannvektoren zeigen in dieselbe Richtung, und man kommt nie „zur Seite“ weg.` },
+      { text: `Einen einzelnen Punkt.`, correct: false,
+        fb: `Mit verschiedenen Werten für ${r} und ${s} erhältst du verschiedene Punkte, z. B. (1|1|0) für ${r} = ${s} = 0 und (3|2|0) für ${r} = 1, ${s} = 0. Es sind also unendlich viele Punkte.` },
+      { text: `Eine Gerade.`, correct: true,
+        fb: `Weil ${v(4,2,0)} = 2 ·&nbsp;${v(2,1,0)} ist, kannst du umformen: ${xv} = ${v(1,1,0)} + (${r} + 2${s}) ·&nbsp;${v(2,1,0)}. Alle Punkte liegen auf einer Geraden. Merke: Die beiden Spannvektoren einer Ebene dürfen keine Vielfachen voneinander sein.` },
+      { text: `Gar nichts, die Gleichung ist ungültig.`, correct: false,
+        fb: `Die Gleichung ist rechnerisch in Ordnung und beschreibt eine Menge von Punkten. Weil die beiden Vektoren aber in dieselbe Richtung zeigen, ist diese Menge keine Ebene, sondern eine Gerade.` }
+    ]
+  }
+];
+
+/* ---------- Zustand ---------- */
+const letters = ["A", "B", "C", "D", "E", "F"];
+const opened = questions.map(() => new Set());  // geöffnete Feedbacks je Frage
+let current = 0;
+let justOpened = -1;
+let scale = 1;
+try { const s = parseFloat(localStorage.getItem("dq-scale")); if (s >= 0.5 && s <= 2.5) scale = s; } catch (e) {}
+
+const $ = id => document.getElementById(id);
+
+function render() {
+  const q = questions[current];
+  let html = `<div class="topic">${q.topic}</div><div class="stem">${q.stem}</div><div class="opts">`;
+  q.options.forEach((o, i) => {
+    const isOpen = opened[current].has(i);
+    const cls = isOpen ? (o.correct ? "correct" : "wrong") : "";
+    html += `<div class="opt ${cls}" data-i="${i}">
+      <button class="opt-btn" aria-expanded="${isOpen}" title="Taste ${letters[i]}">
+        <span class="badge">${letters[i]}</span><span>${o.text}</span>
+      </button>
+      ${isOpen ? `<div class="fb ${o.correct ? "correct" : "wrong"}${i === justOpened ? " new" : ""}"><span class="verdict">${o.correct ? "✔ Richtig!" : "✘ Leider falsch."}</span>${o.fb}</div>` : ""}
+    </div>`;
+  });
+  html += `</div>`;
+  $("content").innerHTML = html;
+
+  $("content").querySelectorAll(".opt").forEach(el => {
+    el.querySelector(".opt-btn").addEventListener("click", () => toggle(+el.dataset.i));
+  });
+
+  $("counter").textContent = `Frage ${current + 1} / ${questions.length}`;
+  $("prev").disabled = current === 0;
+  $("next").disabled = current === questions.length - 1;
+  document.querySelectorAll(".dot").forEach((d, i) => d.classList.toggle("active", i === current));
+}
+
+function toggle(i) {
+  const s = opened[current];
+  const wasOpen = s.has(i);
+  s.clear();
+  if (!wasOpen) s.add(i);
+  justOpened = wasOpen ? -1 : i;
+  render();
+  justOpened = -1;
+  if (!wasOpen) {
+    const fb = $("content").querySelector(`.opt[data-i="${i}"] .fb`);
+    if (fb) fb.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }
+}
+
+function go(i) {
+  if (i < 0 || i >= questions.length) return;
+  current = i;
+  render();
+  $("main").scrollTop = 0;
+}
+
+function setScale(s) {
+  scale = Math.min(2.5, Math.max(0.5, Math.round(s * 10) / 10));
+  document.documentElement.style.setProperty("--scale", scale);
+  $("zoomLabel").textContent = Math.round(scale * 100) + " %";
+  try { localStorage.setItem("dq-scale", scale); } catch (e) {}
+}
+
+/* ---------- Bedienelemente ---------- */
+questions.forEach((_, i) => {
+  const d = document.createElement("button");
+  d.className = "dot"; d.title = `Frage ${i + 1}`; d.setAttribute("aria-label", `Frage ${i + 1}`);
+  d.addEventListener("click", () => go(i));
+  $("dots").appendChild(d);
+});
+$("prev").addEventListener("click", () => go(current - 1));
+$("next").addEventListener("click", () => go(current + 1));
+$("zoomIn").addEventListener("click", () => setScale(scale + 0.1));
+$("zoomOut").addEventListener("click", () => setScale(scale - 0.1));
+$("reset").addEventListener("click", () => { opened[current].clear(); render(); });
+
+/* Tastatur & Presenter-Fernbedienung */
+document.addEventListener("keydown", e => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const k = e.key;
+  if (k === "ArrowRight" || k === "PageDown") { e.preventDefault(); go(current + 1); }
+  else if (k === "ArrowLeft" || k === "PageUp") { e.preventDefault(); go(current - 1); }
+  else if (k === "+" || k === "=") setScale(scale + 0.1);
+  else if (k === "-" || k === "_") setScale(scale - 0.1);
+  else if (k === "0") setScale(1);
+  else {
+    const idx = letters.indexOf(k.toUpperCase());
+    if (idx >= 0 && idx < questions[current].options.length) toggle(idx);
+  }
+});
+
+setScale(scale);
+render();
+</script>
+</body>
+</html>

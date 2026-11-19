@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Übung – Ebene oder Plattform?</title>
+<style>
+  :root { --scale: 1; --navy: #1f3a68; --sol: #1d5fa8; }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; display: flex; flex-direction: column;
+    font-family: system-ui, "Segoe UI", Roboto, Arial, sans-serif;
+    background: #fff; color: #111;
+  }
+
+  header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 4vw; background: var(--navy); color: #fff; font-size: 20px;
+  }
+  header .title { font-weight: 700; }
+  header a.menu { color: #fff; text-decoration: none; border: 2px solid rgba(255,255,255,.6); border-radius: 6px; padding: 2px 10px; margin-right: 14px; font-weight: 600; }
+  header a.menu:hover { background: rgba(255,255,255,.18); }
+  header .counter { font-weight: 600; opacity: .9; }
+
+  main {
+    flex: 1; overflow-y: auto;
+    font-size: calc(clamp(22px, 2.2vw, 44px) * var(--scale));
+    padding: 1em 4vw 2em;
+  }
+  .wrap { max-width: 1600px; margin: 0 auto; }
+  .topic {
+    font-size: .62em; font-weight: 700; letter-spacing: .06em;
+    text-transform: uppercase; color: #5a6475; margin-bottom: .3em;
+  }
+  .intro { font-size: 1.05em; font-weight: 600; line-height: 1.55; margin-bottom: .8em; }
+
+  .part {
+    border: 3px solid #cdd5e3; border-radius: .4em; background: #f6f8fb;
+    padding: .5em .8em; margin-bottom: .55em;
+  }
+  .part-head { display: flex; align-items: center; gap: .8em; flex-wrap: wrap; justify-content: space-between; }
+  .part-text { flex: 1 1 60%; line-height: 1.55; }
+  .part-label { font-weight: 800; color: var(--navy); margin-right: .3em; }
+
+  .sol-btn {
+    flex: none; font: inherit; font-size: .7em; font-weight: 700; cursor: pointer;
+    color: var(--sol); background: #fff; border: 2px solid var(--sol); border-radius: .4em;
+    padding: .3em .7em;
+  }
+  .sol-btn:hover, .sol-btn[aria-expanded="true"] { background: var(--sol); color: #fff; }
+  .sol-btn:focus-visible { outline: 4px solid #f2b705; outline-offset: 2px; }
+
+  .sol {
+    margin-top: .5em; padding: .55em .9em; border-left: .3em solid var(--sol);
+    background: #e9f1fb; border-radius: .3em; line-height: 1.6; font-size: .92em;
+  }
+  .sol.new { animation: fade .25s ease-out; }
+  .sol .sol-title { font-weight: 800; color: var(--sol); margin-right: .35em; }
+  .sol .line { margin: .25em 0; }
+  @keyframes fade { from { opacity: 0; transform: translateY(-.2em); } to { opacity: 1; transform: none; } }
+
+  /* Mathe */
+  .cv { display: inline-flex; vertical-align: middle; margin: 0 .12em; }
+  .cv-in {
+    display: inline-flex; flex-direction: column; align-items: center;
+    padding: 0 .35em; line-height: 1.12; font-size: .82em;
+    border-left: .09em solid currentColor; border-right: .09em solid currentColor;
+    border-radius: .55em;
+  }
+  .vn { position: relative; display: inline-block; font-style: italic; }
+  .vn::before {
+    content: "\2192"; position: absolute; left: 50%; top: -.68em;
+    transform: translateX(-50%); font-size: .7em; font-style: normal; line-height: 1;
+  }
+  .vn.two::before { transform: translateX(-50%) scaleX(1.9); }
+  .fr { display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; font-size: .8em; line-height: 1.05; margin: 0 .1em; }
+  .fr > span:first-child { border-bottom: .07em solid currentColor; padding: 0 .1em; }
+  i.var { font-family: "Cambria Math", "Times New Roman", serif; }
+  .blank { display: inline-block; min-width: 1.6em; border-bottom: .08em solid currentColor; height: 1em; }
+  .cv .blank { min-width: 1.3em; margin: .08em 0; }
+
+  footer {
+    display: flex; justify-content: space-between; align-items: center; gap: 16px;
+    padding: 10px 4vw; border-top: 2px solid #e2e6ee; background: #f7f8fb; font-size: 20px;
+  }
+  .group { display: flex; align-items: center; gap: 8px; }
+  footer button {
+    font: inherit; font-weight: 700; cursor: pointer; color: var(--navy);
+    background: #fff; border: 2px solid var(--navy); border-radius: 8px; padding: 8px 16px;
+  }
+  footer button:hover:not(:disabled) { background: var(--navy); color: #fff; }
+  footer button:disabled { opacity: .35; cursor: default; }
+  .dots { display: flex; gap: 10px; }
+  .dot {
+    width: 18px; height: 18px; padding: 0 !important; border-radius: 50% !important;
+    border: 2px solid var(--navy) !important; background: #fff;
+  }
+  .dot.active { background: var(--navy) !important; }
+  #zoomLabel { min-width: 3.4em; text-align: center; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="title"><a class="menu" href="Ebenen.html" title="Zum Hauptmenü">&#8962; Menü</a>Übung Ebenen: Ebene oder Plattform?</span>
+  <span class="counter" id="counter"></span>
+</header>
+
+<main id="main"><div class="wrap" id="content"></div></main>
+
+<footer>
+  <div class="group">
+    <button id="prev" title="Zurück (Pfeil links)">&larr; Zurück</button>
+    <button id="next" title="Weiter (Pfeil rechts)">Weiter &rarr;</button>
+  </div>
+  <div class="dots" id="dots"></div>
+  <div class="group">
+    <button id="reset" title="Alle Lösungen dieser Aufgabe ausblenden">Lösungen ausblenden</button>
+    <button id="zoomOut" title="Schrift kleiner (−)">A−</button>
+    <span id="zoomLabel">100 %</span>
+    <button id="zoomIn" title="Schrift größer (+)">A+</button>
+  </div>
+</footer>
+
+<script>
+/* ---------- Mathe-Hilfen ---------- */
+const v  = (...c) => `<span class="cv"><span class="cv-in">${c.map(x => `<span>${x}</span>`).join("")}</span></span>`;
+const n  = s => `<span class="vn${s.length > 1 ? " two" : ""}">${s}</span>`;
+const f  = (a, b) => `<span class="fr"><span>${a}</span><span>${b}</span></span>`;
+const t  = `<i class="var">t</i>`;
+const s  = `<i class="var">s</i>`;
+const m  = "−";
+const xv = n("x");
+const B  = `<span class="blank"></span>`;
+const L  = html => `<div class="line">${html}</div>`;
+
+/* ---------- Aufgaben ---------- */
+const r = `<i class="var">r</i>`;
+function rsPlot(pts) {
+  const X = a => 130 + a * 160, Y = b => 230 - b * 160;
+  let g = `<svg viewBox="0 0 470 290" width="560" style="max-width:100%;height:auto;display:block;margin:.4em 0;background:#fff;border-radius:.3em" font-family="system-ui,Arial" font-size="18">`;
+  g += `<polygon points="${X(0)},${Y(0)} ${X(1)},${Y(0)} ${X(0)},${Y(1)}" fill="#cfe3f7" stroke="#1d5fa8" stroke-width="2"/>`;
+  g += `<line x1="${X(-0.35)}" y1="${Y(0)}" x2="${X(1.95)}" y2="${Y(0)}" stroke="#333" stroke-width="1.5"/><text x="${X(1.95)-6}" y="${Y(0)+20}">r</text>`;
+  g += `<line x1="${X(0)}" y1="${Y(-0.35)}" x2="${X(0)}" y2="${Y(1.4)}" stroke="#333" stroke-width="1.5"/><text x="${X(0)+8}" y="${Y(1.4)+12}">s</text>`;
+  for (const k of [0.5, 1, 1.5]) g += `<line x1="${X(k)}" y1="${Y(0)-4}" x2="${X(k)}" y2="${Y(0)+4}" stroke="#333"/><text x="${X(k)-8}" y="${Y(0)+20}">${String(k).replace(".", ",")}</text>`;
+  for (const k of [0.5, 1]) g += `<line x1="${X(0)-4}" y1="${Y(k)}" x2="${X(0)+4}" y2="${Y(k)}" stroke="#333"/><text x="${X(0)-34}" y="${Y(k)+5}">${String(k).replace(".", ",")}</text>`;
+  g += `<text x="${X(0.12)}" y="${Y(0.18)}" fill="#1d5fa8" font-weight="700">Plattform</text>`;
+  for (const p of pts) { const on = p[3]; g += `<circle cx="${X(p[0])}" cy="${Y(p[1])}" r="6" fill="${on ? "#1b7f3b" : "#c62828"}"/><text x="${X(p[0])+9}" y="${Y(p[1])-7}" font-weight="700">${p[2]}</text>`; }
+  return g + `</svg>`;
+}
+const tasks = [
+  {
+    topic: "Aufgabe 1 · Auf der Plattform oder nicht?",
+    intro: `Die Plattform ist das Dreieck mit A(1|1|0), B(5|1|0), C(1|3|2). Sie liegt in<br>E: ${xv} = ${v(1,1,0)}&nbsp;+&nbsp;${r}&nbsp;· ${v(4,0,0)}&nbsp;+&nbsp;${s}&nbsp;· ${v(0,2,2)}.<br>Gegeben sind die Parameterpaare (1) ${r} = 0,3; ${s} = 0,3 &nbsp; (2) ${r} = 1; ${s} = 0,5 &nbsp; (3) ${r} = ${m}0,5; ${s} = 0,5 &nbsp; (4) ${r} = 0,5; ${s} = 0`,
+    parts: [
+      { label: "a)", text: `Berechne jeweils den zugehörigen Punkt.`,
+        sol: L(`(1): ${v(1,1,0)} + 0,3 ·&nbsp;${v(4,0,0)} + 0,3 ·&nbsp;${v(0,2,2)} = ${v("2,2","1,6","0,6")}`) +
+             L(`(2): ${v(1,1,0)} + 1 ·&nbsp;${v(4,0,0)} + 0,5 ·&nbsp;${v(0,2,2)} = ${v(5,2,1)}`) +
+             L(`(3): ${v(1,1,0)} ${m} 0,5 ·&nbsp;${v(4,0,0)} + 0,5 ·&nbsp;${v(0,2,2)} = ${v(m+"1",2,1)}`) +
+             L(`(4): ${v(1,1,0)} + 0,5 ·&nbsp;${v(4,0,0)} = ${v(3,1,0)}`) },
+      { label: "b)", text: `Entscheide jeweils, ob der Punkt auf der Plattform liegt. Stell dir dazu vor, wie du von A aus gehst.`,
+        sol: L(`(1) <b>auf</b> der Plattform: ein kleines Stück Richtung B und ein kleines Stück Richtung C.`) +
+             L(`(2) <b>nicht</b> darauf: Du gehst ganz bis B und dann noch weiter Richtung C. Das führt über die Kante BC hinaus.`) +
+             L(`(3) <b>nicht</b> darauf: ${r} < 0 heißt, du gehst von A aus von B weg.`) +
+             L(`(4) <b>auf</b> der Plattform: Mittelpunkt der Kante AB.`) },
+      { label: "c)", text: `Trage die vier Parameterpaare in ein ${r}-${s}-Koordinatensystem ein (${r} nach rechts, ${s} nach oben). Welche Form hat der Bereich der Plattform?`,
+        sol: rsPlot([[0.3,0.3,"(1)",true],[1,0.5,"(2)",false],[-0.5,0.5,"(3)",false],[0.5,0,"(4)",true]]) +
+             L(`Der Bereich der Plattform ist das Dreieck mit den Ecken (0|0), (1|0) und (0|1) im ${r}-${s}-System.`) }
+    ]
+  },
+  {
+    topic: "Aufgabe 2 · Ecken und Kantenmitten",
+    intro: `Wir bleiben bei der Plattform in E: ${xv} = ${v(1,1,0)}&nbsp;+&nbsp;${r}&nbsp;· ${v(4,0,0)}&nbsp;+&nbsp;${s}&nbsp;· ${v(0,2,2)}.`,
+    parts: [
+      { label: "a)", text: `Welche Parameter gehören zu den Ecken A, B und C?`,
+        sol: L(`A: ${r} = 0, ${s} = 0 &nbsp;&nbsp; B: ${r} = 1, ${s} = 0 &nbsp;&nbsp; C: ${r} = 0, ${s} = 1`) },
+      { label: "b)", text: `Welche Parameter gehören zu den Mittelpunkten der Kanten AB, AC und BC?`,
+        sol: L(`Mitte AB: ${r} = 0,5, ${s} = 0 ⇒ (3|1|0)`) +
+             L(`Mitte AC: ${r} = 0, ${s} = 0,5 ⇒ (1|2|1)`) +
+             L(`Mitte BC: ${r} = 0,5, ${s} = 0,5 ⇒ (3|2|1)`) }
+    ]
+  },
+  {
+    topic: "Aufgabe 3 · Die Regel finden",
+    intro: `Wir suchen eine Bedingung für ${r} und ${s}, damit der zugehörige Punkt auf der Plattform ABC liegt.`,
+    parts: [
+      { label: "a)", text: `Was gilt für ${r} und ${s} bei allen Punkten der Kante AB?`,
+        sol: L(`${s} = 0 und 0 ≤ ${r} ≤ 1`) },
+      { label: "b)", text: `Was gilt für ${r} und ${s} bei allen Punkten der Kante AC?`,
+        sol: L(`${r} = 0 und 0 ≤ ${s} ≤ 1`) },
+      { label: "c)", text: `Auf der Kante BC liegen z. B. die Punkte mit (${r} | ${s}) = (1 | 0), (0,5 | 0,5) und (0 | 1). Was fällt dir auf?`,
+        sol: L(`In allen Fällen gilt ${r}&nbsp;+&nbsp;${s} = 1.`) + L(`Auf der Kante BC gilt also ${r}&nbsp;+&nbsp;${s} = 1 mit ${r}, ${s} ≥ 0.`) },
+      { label: "d)", text: `Formuliere eine Bedingung für alle Punkte der Plattform.`,
+        sol: L(`Ein Punkt liegt genau dann auf der Plattform, wenn gilt:`) +
+             L(`<b>${r} ≥ 0, ${s} ≥ 0 und ${r}&nbsp;+&nbsp;${s} ≤ 1</b>`) }
+    ]
+  },
+  {
+    topic: "Aufgabe 4 · Eine größere Plattform",
+    intro: `Die Plattform soll zu einem Parallelogramm ABDC erweitert werden. D ist der Punkt, den man von A aus über ${n("AB")} und dann ${n("AC")} erreicht.`,
+    parts: [
+      { label: "a)", text: `Bestimme den Punkt D.`,
+        sol: L(`${r} = 1, ${s} = 1: ${v(1,1,0)}&nbsp;+&nbsp;${v(4,0,0)}&nbsp;+&nbsp;${v(0,2,2)} = ${v(5,3,2)} ⇒ D(5|3|2)`) },
+      { label: "b)", text: `Für welche Werte von ${r} und ${s} liegt ein Punkt auf dem Parallelogramm?`,
+        sol: L(`0 ≤ ${r} ≤ 1 und 0 ≤ ${s} ≤ 1`) + L(`Die Bedingung ${r}&nbsp;+&nbsp;${s} ≤ 1 fällt weg.`) },
+      { label: "c)", text: `Liegt der Punkt zu ${r} = 0,8 und ${s} = 0,7 auf dem Parallelogramm? Und auf der ursprünglichen dreieckigen Plattform?`,
+        sol: L(`Parallelogramm: <b>ja</b>, beide Werte liegen zwischen 0 und 1.`) +
+             L(`Dreieck: <b>nein</b>, denn ${r}&nbsp;+&nbsp;${s} = 1,5 > 1.`) }
+    ]
+  },
+  {
+    topic: "Aufgabe 5 · Anwendung im Skatepark",
+    intro: `Wir bleiben bei der dreieckigen Plattform in E: ${xv} = ${v(1,1,0)}&nbsp;+&nbsp;${r}&nbsp;· ${v(4,0,0)}&nbsp;+&nbsp;${s}&nbsp;· ${v(0,2,2)} (Angaben in Metern, z = Höhe).`,
+    parts: [
+      { label: "a)", text: `Ein Skater steht im Punkt mit ${r} = 0,4 und ${s} = 0,4. Steht er auf der Plattform? In welcher Höhe?`,
+        sol: L(`${r}, ${s} ≥ 0 und ${r}&nbsp;+&nbsp;${s} = 0,8 ≤ 1 ⇒ <b>ja</b>, er steht auf der Plattform.`) +
+             L(`Punkt: ${v(1,1,0)} + 0,4 ·&nbsp;${v(4,0,0)} + 0,4 ·&nbsp;${v(0,2,2)} = ${v("2,6","1,8","0,8")}`) +
+             L(`Er steht in 0,8 m Höhe.`) },
+      { label: "b)", text: `Wo ist die höchste Stelle der Plattform, und wie hoch liegt sie?`,
+        sol: L(`Die Höhe ist z = 2${s}. Sie hängt nur von ${s} ab und ist am größten für ${s} = 1 (dann muss ${r} = 0 sein).`) +
+             L(`Höchste Stelle: C(1|3|2), also 2 m hoch.`) },
+      { label: "c)", text: `Beschreibe alle Punkte der Plattform, die genau 1 m hoch liegen.`,
+        sol: L(`z = 2${s} = 1 ⇒ ${s} = 0,5. Wegen ${r}&nbsp;+&nbsp;${s} ≤ 1 gilt dann 0 ≤ ${r} ≤ 0,5.`) +
+             L(`${r} = 0: (1|2|1) &nbsp;&nbsp; ${r} = 0,5: (3|2|1)`) +
+             L(`Alle Punkte in 1 m Höhe liegen auf der Strecke von (1|2|1) bis (3|2|1).`) }
+    ]
+  }
+];
+
+/* ---------- Zustand ---------- */
+const opened = tasks.map(() => new Set());
+let current = 0, justOpened = -1, scale = 1;
+try { const sc = parseFloat(localStorage.getItem("ue-scale")); if (sc >= 0.5 && sc <= 2.5) scale = sc; } catch (e) {}
+const $ = id => document.getElementById(id);
+
+function render() {
+  const task = tasks[current];
+  let html = `<div class="topic">${task.topic}</div><div class="intro">${task.intro}</div>`;
+  task.parts.forEach((p, i) => {
+    const open = opened[current].has(i);
+    html += `<div class="part" data-i="${i}">
+      <div class="part-head">
+        <div class="part-text"><span class="part-label">${p.label}</span>${p.text}</div>
+        <button class="sol-btn" aria-expanded="${open}" title="Taste ${i + 1}">${open ? "Lösung ausblenden ▴" : "Lösung anzeigen ▾"}</button>
+      </div>
+      ${open ? `<div class="sol${i === justOpened ? " new" : ""}"><span class="sol-title">Musterlösung ${p.label}</span>${p.sol}</div>` : ""}
+    </div>`;
+  });
+  $("content").innerHTML = html;
+  $("content").querySelectorAll(".part").forEach(el =>
+    el.querySelector(".sol-btn").addEventListener("click", () => toggle(+el.dataset.i)));
+
+  $("counter").textContent = `Aufgabe ${current + 1} / ${tasks.length}`;
+  $("prev").disabled = current === 0;
+  $("next").disabled = current === tasks.length - 1;
+  document.querySelectorAll(".dot").forEach((d, i) => d.classList.toggle("active", i === current));
+}
+
+function toggle(i) {
+  const set = opened[current];
+  const was = set.has(i);
+  was ? set.delete(i) : set.add(i);
+  justOpened = was ? -1 : i;
+  render();
+  justOpened = -1;
+  if (!was) {
+    const el = $("content").querySelector(`.part[data-i="${i}"] .sol`);
+    if (el) el.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }
+}
+
+function go(i) {
+  if (i < 0 || i >= tasks.length) return;
+  current = i; render(); $("main").scrollTop = 0;
+}
+
+function setScale(sc) {
+  scale = Math.min(2.5, Math.max(0.5, Math.round(sc * 10) / 10));
+  document.documentElement.style.setProperty("--scale", scale);
+  $("zoomLabel").textContent = Math.round(scale * 100) + " %";
+  try { localStorage.setItem("ue-scale", scale); } catch (e) {}
+}
+
+tasks.forEach((_, i) => {
+  const d = document.createElement("button");
+  d.className = "dot"; d.title = `Aufgabe ${i + 1}`; d.setAttribute("aria-label", `Aufgabe ${i + 1}`);
+  d.addEventListener("click", () => go(i));
+  $("dots").appendChild(d);
+});
+$("prev").addEventListener("click", () => go(current - 1));
+$("next").addEventListener("click", () => go(current + 1));
+$("zoomIn").addEventListener("click", () => setScale(scale + 0.1));
+$("zoomOut").addEventListener("click", () => setScale(scale - 0.1));
+$("reset").addEventListener("click", () => { opened[current].clear(); render(); });
+
+document.addEventListener("keydown", e => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const k = e.key;
+  if (k === "ArrowRight" || k === "PageDown") { e.preventDefault(); go(current + 1); }
+  else if (k === "ArrowLeft" || k === "PageUp") { e.preventDefault(); go(current - 1); }
+  else if (k === "+" || k === "=") setScale(scale + 0.1);
+  else if (k === "-" || k === "_") setScale(scale - 0.1);
+  else if (k === "0") setScale(1);
+  else if (/^[1-9]$/.test(k) && +k <= tasks[current].parts.length) toggle(+k - 1);
+});
+
+setScale(scale);
+render();
+</script>
+</body>
+</html>
